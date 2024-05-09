@@ -1,0 +1,176 @@
+<!-- /*
+* Bootstrap 5
+* Template Name: Furni
+* Template Author: Untree.co
+* Template URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate='~{layouts/layout1}'>
+<head>
+
+	<title>About Us</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+	<!-- 상단, 사이트 소개 -->
+	<div class="hero">
+		<div class="container">
+			<div class="row justify-content-between">
+				<div class="col-lg-5">
+					<div class="intro-excerpt">
+						<h1>About Us</h1>
+						<p class="mb-4">우리 주변에 함께하지만 쉬이 관심을 가지지 못 하는 새들.<br>
+							이 곳에서 새들에 대해 알아보고, 새들과 공존하며,<br>
+							새들에 대한 흥미와 관심을 높히고 새들이 우리 주변에서 어떻게 존재하는지<br>
+							더 깊이 이해하는 시간을 가져보고자 이 사이트를 개설하게 되었습니다.</p>
+					</div>
+				</div>
+				<div class="col-lg-7">
+					<div class="hero-img-wrap">
+						<img src="images/h1.jpg" class="img-fluid">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End Hero Section -->
+
+
+
+	<!-- 사이트 목록들 상세소개 -->
+	<div class="why-choose-section">
+		<div class="container">
+			<div class="row justify-content-between align-items-center">
+				<div class="col-lg-6">
+					<h2 class="section-title">우리 Birdy의 공간에서는...</h2>
+
+					<div class="row my-5">
+						<div class="col-6 col-md-6">
+							<div class="feature">
+								<div class="icon">
+									<img src="images/truck.svg" alt="Image" class="imf-fluid">
+								</div>
+								<h3>Bird List</h3>
+								<p>우리나라에서 볼 수 있는 텃새, 철새를 볼 수 있고,<br>
+									멸종 위기의 보호가 필요한 희귀종 새들도 1급과 2급으로 나누어 볼 수 있는 공간입니다.</p>
+								<a th:href="@{/bird/birds}">보러가기</a>
+							</div>
+						</div>
+
+						<div class="col-6 col-md-6">
+							<div class="feature">
+								<div class="icon">
+									<img src="images/bag.svg" alt="Image" class="imf-fluid">
+								</div>
+								<h3>통계</h3>
+								<p>분기별, 지역별 서식하는 새들의 통계 결과를<br>
+									데이터 표와 그래프 형식으로 간편히 확인하여 볼 수 있는 공간입니다.</p>
+								<a th:href="@{/}">보러가기</a>
+							</div>
+						</div>
+
+						<div class="col-6 col-md-6">
+							<div class="feature">
+								<div class="icon">
+									<img src="images/support.svg" alt="Image" class="imf-fluid">
+								</div>
+								<h3>철새 경로</h3>
+								<p>철새의 이동경를 지도 위에 표시하여 새들이 어디서 어떻게 우리 나라를 경유해가는 지 알 수 있는 공간입니다.</p>
+								<a th:href="@{/bird/birdy}">보러가기</a>
+							</div>
+						</div>
+
+						<div class="col-6 col-md-6">
+							<div class="feature">
+								<div class="icon">
+									<img src="images/return.svg" alt="Image" class="imf-fluid">
+								</div>
+								<h3>뉴스 & 과학</h3>
+								<p>새와 관련되어 뉴스 기사나, 과학 기사 등등...<br>
+									새를 주제로 한 흥미로운 여러 기삿거리들을 한 눈에 모아 볼 수 있는 공간입니다.</p>
+								<a th:href="@{/members/news}">보러가기</a>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- End Why Choose Us Section -->
+
+	<!-- 팀소개 -->
+	<div class="untree_co-section">
+		<div class="container">
+
+			<div class="row mb-5">
+				<div class="col-lg-5 mx-auto text-center">
+					<h2 class="section-title">Team One</h2>
+				</div>
+			</div>
+
+			<div class="row">
+
+				<!-- Start Column 1 -->
+				<div class="col-12 col-md-6 col-lg-3 mb-5 mb-md-0">
+					<img src="images/black.jpg" class="img-fluid mb-5">
+					<h3>Kim Jinsu</h3>
+					<span class="d-block position mb-4">Team One 의 팀장</span>
+					<p>Team One을 이끌고, 프로젝트의 스케줄과 진행사항을 총괄적으로 관리하는 팀장입니다.
+						지역별 새의 개체수 통계 자료를 엑셀형식으로 가져와 정리하고,
+						데이터에 따른 그래프를 생성하여 통계를 내는 기능을 담당하였습니다.
+						팀원들이 각기 구성한 코드들을 취합하여 하나의 사이트로 완성시키는 최종 통합 역할을 맡았습니다.
+					</p>
+				</div>
+				<!-- End Column 1 -->
+
+				<!-- Start Column 2 -->
+				<div class="col-12 col-md-6 col-lg-3 mb-5 mb-md-0">
+					<img src="images/chi.jpg" class="img-fluid mb-5">
+					<h3>Lee Sejin</h3>
+					<span class="d-block position mb-4">Team One 의 팀원</span>
+					<p>Team One의 일원으로, 우리나라에 서식하는 새들에 대한 데이터를 넷상에서 크롤링해와 앨범 형식으로 나열하고,<br>
+						이메일 인증을 통한 회원가입과 로그인, 비밀번호 변경, 회원 정보 수정 등.<br>
+						사이트의 회원들을 위한 기본적 기능 구현을 담당하였습니다.<br>
+						더불어, 사이트와 팀원들의 소개도 맡고 있습니다.
+					</p>
+				</div>
+				<!-- End Column 2 -->
+
+				<!-- 3 -->
+				<div class="col-12 col-md-6 col-lg-3 mb-5 mb-md-0">
+					<img src="images/doyo.jpeg" class="img-fluid mb-5">
+					<h3>Kim Taeri</h3>
+					<span class="d-block position mb-4">Team One 의 팀원</span>
+					<p>Team One의 일원으로, 새에 관련한 뉴스 기사나 관련된 흥미로운 주제들을 넷상에서 크롤링해와 보여주고,<br>
+						회원들간의 소통이 가능한 게시판과 철새들의 이동경로를 알 수 있는 API 데이터 페이지를 담당하였습니다.
+					</p>
+				</div>
+				<!-- 3 -->
+
+				<!--소개태그원본-->
+				<!--					<div class="col-12 col-md-6 col-lg-3 mb-5 mb-md-0">-->
+				<!--						<img src="images/person_3.jpg" class="img-fluid mb-5">-->
+				<!--						<h3 clas><a href="#"><span class="">Patrik</span> White</a></h3>-->
+				<!--            <span class="d-block position mb-4">CEO, Founder, Atty.</span>-->
+				<!--            <p>Separated they live in.-->
+				<!--            Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>-->
+				<!--            <p class="mb-0"><a href="#" class="more dark">Learn More <span class="icon-arrow_forward"></span></a></p>-->
+				<!--					</div> -->
+
+			</div>
+		</div>
+	</div>
+	<!-- End Team Section -->
+
+</div>
+</body>
+
+</html>

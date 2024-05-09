@@ -1,0 +1,77 @@
+header .icon-container {
+  left: 45px;
+  top: 200px;
+}
+
+header{
+  height: 100%;
+}
+/* 헤더 영역 */
+/* 이미지 로고 영역 */
+
+header .logo img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+/* 사이트명: 버디(임시) */
+header .logo h1{
+  margin: -70px 0 0 95px;
+  cursor: pointer;
+}
+header .logo h1 a{
+  font-size: 35px;
+  font-family: 'GangwonEdu_OTFBoldA';
+  color: black;
+}
+
+/* 헤더 본문 메뉴바 영역 */
+.icon-container .menubar #menu-container ul li a {
+  font-size: 24px;
+}
+
+/* 공용(헤더, 푸터, 사이드메뉴)추가 코드 조정 */
+
+.icon-container {
+  z-index: 3;
+}
+
+header .logo{
+  /* 상단로고 */
+  position: fixed;
+  z-index: 6;
+  text-align: center;
+  box-shadow: 0 0 5px rgb(101, 101, 101);
+  border-radius: 50%;
+  top: -20px;
+  left: 20px;
+}
+
+header .top-menu {
+  position: fixed;
+  /* 항상 상단에 고정 */
+  z-index: 5;
+  /* 다른 요소에 가려지지 않도록 우선순위 */
+  /* background: white; */
+  width: 100%;
+  margin: 30px 20px 0 0;
+  height: 70px;
+}
+
+/* 사이드 메뉴 화면에 붙도록 조절 */
+.icon-container .menu_section {
+  margin-top: -100px;
+  margin-left: -100px;
+  background: linear-gradient(to top left, rgba(116, 116, 116, 0.3), rgba(255,255,255,0.8),white,white);
+  border-radius: 0 20px 20px 0;
+  padding: 20px;
+}
+/* 헤어 top메뉴 글씨 라인 */
+.top-menu .menu-list li::after{
+  /* 공용의 bottom 값 주석처리해놓았음 */
+  top:35px;
+}
+
+ footer{
+  font-size: 25px;
+ }

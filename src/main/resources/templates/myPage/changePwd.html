@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<head>
+
+    <!--사용자 css 추가-->
+        <style>
+            .fieldError{
+                color: #bd2130;
+            }
+        </style>
+
+    <!-- 사용자 js 추가 -->
+        <script th:inline="javascript">
+            $(document).ready(function(){
+                const errorMessage = [[${errorMessage}]];
+                if(errorMessage != null){
+                    alert(errorMessage);
+                }
+
+                // 버튼 활성화 함수
+                function enableCheckButton() {
+                    $("#checkButton").prop("disabled", false);
+                }
+
+                // 인증메일 발송
+                $("button[name='sendCertCode']").click(function() {
+                    const csrfToken = $("meta[name='_csrf']").attr("content");
+                    const memberEmail = $("#memberEmail").val();
+                    const requestData = { "memberEmail": memberEmail};
+                    $.ajax({
+                        url: "/members/cert",
+                        type: "POST",
+                        contentType: "application/json",
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        data: JSON.stringify(requestData),
+                        cache: false,
+                        success: function(result, status){
+                            alert("인증번호가 발송되었습니다.");
+                        },
+                        error: function(jqXHR, status, error) {
+                            alert("인증번호 발송중 오류가 발생하였습니다.");
+                        }
+                    });
+                });
+
+                // 인증번호 확인
+                $("button[name='verifyCode']").click(function() {
+                    verifyCode();
+                });
+
+                function verifyCode() {
+                    var memberEmail = $("#memberEmail").val();
+                    var certCode = $("#certCode").val();
+                    const csrfToken = $("meta[name='_csrf']").attr("content");
+                    $.ajax({
+                        type: "POST",
+                        url: "/members/verify",
+                        contentType: "application/json",
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        data: JSON.stringify({ "memberEmail": memberEmail, "certCode": certCode }),
+                        success: function(response) {
+                            alert("인증에 성공했습니다.");
+                            enableCheckButton(true);
+                        },
+                        error: function(error) {
+                            alert("인증에 실패했습니다. 올바른 인증코드를 입력해주세요.");
+                            enableCheckButton(false); // 버튼 비활성화
+                        }
+                    });
+                }
+            });
+        </script>
+    <title>비밀번호 변경</title>
+</head>
+
+<body>
+
+
+
+<div layout:fragment="content">
+
+<!--    <form action="/members/changePassword" role="form" method="post"-->
+<!--          th:object="${memberFormDTO}">-->
+<!--        <input type="hidden" name="memberEmail" th:value="${memberEmail}">-->
+
+    <form action="/members/changePassword" enctype="multipart/form-data"  method="post" th:object="${memberFormDTO}">
+
+        <div class="form-group">
+            <label for="memberEmail"></label>
+            <input type="email" class="form-control" id="memberEmail"
+                   th:field="*{memberEmail}" readonly>
+        </div>
+<br>
+        <p>이메일로 인증 번호를 받아 본인 확인을 진행해주세요.</p>
+        <div class="input-box">
+            <label><button type="button"  name="sendCertCode" >인증번호발송</button></label>
+            <input type="text" class="input-field join-number" placeholder="인증번호"
+                   id="certCode" required>
+            <div id="timer"></div>
+            <br>
+            <button type="button" name="verifyCode">확인</button>
+        </div>
+<br>
+        <div class="form-group">
+            <label for="memberPwd">새로운 비밀번호_</label>
+            <input type="password" class="form-control" id="memberPwd"
+                   name="memberPwd" placeholder="4~20자 사이로 설정해주세요">
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary" id="checkButton" disabled>변경하기</button>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+    </form>
+</div>
+</body>
+</html>

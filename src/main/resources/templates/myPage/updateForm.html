@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+<meta name="_csrf" th:content="${_csrf.token}"/>
+
+<head>
+<!-- 사용자 css 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        .fieldError {
+            color: #bd2130;
+        }
+    </style>
+</th:block>
+
+<!-- 사용자 스크립트 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(document).ready(function(){
+            const errorMessage = [[${errorMessage}]]
+            if(errorMessage){
+                alert(errorMessage);
+            }
+
+//비밀번호 *로 표시하기
+            var passwordLength = $('#memberPwd').val().length; // 비밀번호 길이
+            var maskedPassword = '*'.repeat(passwordLength); // '*'로 대체된 비밀번호
+            $('#memberPwd').val(maskedPassword); // '*'로 대체된 비밀번호 설정
+
+            // 프로필 이미지 미리보기 기능
+            $("#profileImageInput").change(function () {
+                readURL(this);
+});
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        });
+    </script>
+</th:block>
+
+    <title>내 정보 수정</title>
+</head>
+
+<body>
+
+<!-- 회원정보 수정 페이지 -->
+<div layout:fragment="content">
+    <form action="/myPage/update" method="post"
+          enctype="multipart/form-data" th:object="${memberFormDTO}">
+
+        <!-- 프로필 이미지 -->
+        <div class="form-group">
+            <p>프로필 이미지:</p>
+            <img id="preview" style="max-width: 200px;" alt="프로필 이미지"/>
+            <input type="file" class="form-control" id="profileImageInput" name="profileFile"/>
+        </div>
+
+        <!-- 회원번호 -->
+        <div class="form-group">
+            <label for="memberId">회원번호</label>
+            <input type="text" class="form-control" id="memberId"
+                   th:field="*{id}" readonly>
+            <p th:if="${#fields.hasErrors('id')}"
+               th:error="*{id}" class="fieldError"></p>
+        </div>
+
+        <!-- 이름 -->
+        <div class="form-group">
+            <label for="memberName">이름</label>
+            <input type="text" class="form-control" id="memberName"
+                   th:field="*{memberName}" required>
+            <p th:if="${#fields.hasErrors('memberName')}"
+               th:error="*{memberName}" class="fieldError">이름을 입력하세요.</p>
+        </div>
+
+        <!-- 이메일 -->
+        <div class="form-group">
+            <label for="memberEmail">이메일</label>
+            <input type="email" class="form-control" id="memberEmail"
+                   th:field="*{memberEmail}" readonly>
+            <p class="form-text text-muted">이메일은 수정할 수 없습니다.</p>
+        </div>
+
+        <!-- 연락처 -->
+        <div class="form-group">
+            <label for="memberPhone">연락처</label>
+            <input type="text" class="form-control" id="memberPhone"
+                   th:field="*{memberPhone}" required>
+            <p th:if="${#fields.hasErrors('memberPhone')}"
+               th:error="*{memberPhone}" class="fieldError"></p>
+        </div>
+
+        <!-- 비밀번호(암호화) -->
+        <div class="form-group">
+            <label for="memberPwd">비밀번호</label>
+            <input type="text" class="form-control" id="memberPwd"
+                   th:field="*{memberPwd}" readonly>
+<!--            <p><span style="color:red;">(비밀번호는 암호화 되어 저장됩니다.)</span></p>-->
+            <a href="/myPage/changePassword" rel="external">비밀번호 수정하기</a>
+        </div>
+
+        <!-- 가입 버튼 -->
+        <button type="submit" class="btn btn-primary">수정하기</button>
+        <!-- CSRF 토큰 -->
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+    </form>
+</div>
+</body>
+</html>

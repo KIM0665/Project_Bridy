@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+    <title>list</title>
+
+    <div layout:fragment="content">
+        <table>
+            <tr>
+                <th>id</th>
+                <th>title</th>
+                <th>writer</th>
+                <th>date</th>
+                <th>hits</th>
+            </tr>
+            <tr th:each="board: ${boardList}">
+                <td th:text="${board.id}"></td>
+                <td><a th:href="@{|/board/${board.id}|}" th:text="${board.boardTitle}"></a></td>
+                <td th:text="${board.adminBoardId}"></td>
+                <td th:text="*{#temporals.format(board.BoardCreatedTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td th:text="${board.boardHits}"></td>
+            </tr>
+        </table>
+    </div>
+</html>

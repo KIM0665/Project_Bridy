@@ -1,0 +1,361 @@
+@font-face {
+  font-family: 'GangwonEdu_OTFBoldA';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
+
+/* 공용 들어가는 기본 default 설정 */
+*{
+  padding: 0;
+  margin: 0;
+  font-family: 'GangwonEdu_OTFBoldA';
+}
+a, p, span{
+  text-decoration: none;
+  
+  font-size: 18px;
+}
+li{
+  list-style: none;
+}
+#container{
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/* 0% ~ 100% 넓이 변환 */
+@keyframes width{
+  0%{
+    width: 20%;
+  }
+ 
+  100%{
+    width: 100%;
+  }
+}
+
+
+/* 이미지 로고 영역 */
+header .logo {
+  margin-top: 30px;
+  width: 70px;
+  height: 70px;
+}
+
+header .logo img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+.mobile{
+  position: fixed;
+  display: flex;
+  top: 0;
+  left: 50%;
+}
+
+.pc-icon img,
+.phone-icon img {
+  width: 70px;
+  height: 70px;
+}
+/* 이미지 로고 영역 종료*/
+
+/* 상단 메뉴바 영역 */
+.top-menu {
+  display: flex;
+  margin: 20px 30px 0 0;
+  justify-content: flex-end; /* 오른쪽 정렬*/
+  position: absolute; /* container 기준*/
+  top: 0; /* 해당 기준으로 위*/
+  right: 0; /* 해당 기준으로 우측*/
+}
+
+  
+.top-menu .menu-list {
+  display: flex; /* 플렉스 컨테이너 및 가로 정렬*/
+}
+
+.top-menu .menu-list li {
+  margin: 0 15px; /* left, right 15px씩 */
+  position: relative; 
+  /*.top-menu의 상대적 위치 지정이 되며, li이가 hover시 아래 애니메이션을 넣기 위해 */
+}
+.top-menu .menu-list li::after {
+  content: "";
+  width: 100%;
+  height: 2px;
+  position: absolute; /* li의 기준으로 절대값*/
+  bottom: -8px; /* hover시 아래 li의 길이 만큼 줄이 생김 */
+  left: 0; /* li의 기준으로 왼쪽으로 붙이기*/
+}
+
+.top-menu .menu-list li:hover::after {
+  background-color: black; /* hover 줄 색상 black*/
+  animation: width 1s ease-in-out; /*width크기 기준*/
+}
+
+.top-menu .menu-list li a {
+  font-size: 20px; /* 메뉴바 글자크기 */
+  color: black; /* 글자 크기 색상*/
+}
+
+.top-menu .menu-list li:hover a {
+  opacity: .5; /* 메뉴 hover 시 투명도 50% */
+  font-weight: 600; /* 글자 굵게*/
+}
+
+/* 아이콘 터치 영역 */
+.icon-container {
+  width: 30px;
+  height: 17px;
+  cursor: pointer;
+  position: relative;
+  /* 문서에 흐름에 기준으로 위치*/
+  display: flex;
+  flex-direction: column;
+  /*자식 요소를 세로로 지정*/
+  justify-content: space-between;
+  /*균등하게 배치*/
+}
+
+
+/* 햄버거 아이콘 만들기 */
+.icon-container .icon {
+  /* 가운데 막대 생성 */
+  margin-top: 7px;
+  width: 24px;
+  height: 3px;
+  background-color: #333;
+  position: relative;
+  /* icon-container 클래스 기준 위치*/
+  transition-delay: 2s;
+  /*2초 지연*/
+}
+
+.icon-container .icon::before,
+.icon-container .icon::after {
+  /* 앞쪽, 끝쪽 막대 생성 */
+  content: ' ';
+  width: 24px;
+  height: 3px;
+  background-color: #333;
+  position: absolute;
+  /*icon클래스 기준으로 절대적 배치*/
+  justify-content: space-around;
+  /*간격 정렬*/
+}
+
+.icon-container .icon::before {
+  /* 가운데 막대 기준으로 위로 8px만큼*/
+  top: -6px;
+}
+
+.icon-container .icon::after {
+  /* 가운데 막대 기준으로 아래로 8px만큼 */
+  top: 6px;
+}
+
+/* 햄버거에 마우스 될 때 서브 메뉴 표시 */
+.icon-container .icon:hover {
+  cursor: pointer;
+}
+
+
+/* 헤더 본문 메뉴바 영역 */
+
+.icon-container .menubar {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 40px;
+  left: -1220px;
+  transition: left 2.4s ease;
+  /* 이동 애니메이션 지정  ease는 처음과 끝 부드러움을 준다.*/
+}
+
+.icon-container .menubar #menu-container {
+  margin-top: 20px;
+  width: 150px;
+  position: fixed;
+}
+
+
+
+.icon-container .menubar #menu-container ul img {
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+}
+
+.icon-container .menubar #menu-container ul img.close {
+  position: absolute;
+}
+
+.icon-container .menubar #menu-container ul li {
+  margin-top: 20px;
+}
+
+.icon-container .menubar #menu-container ul li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 24px;
+}
+
+.icon-container .menubar #menu-container ul li>ul {
+  font-size: 0.5rem;
+  /* 서브 메뉴은 부모 li의 기준으로 상대값 부여*/
+}
+
+.icon-container .menubar #menu-container ul li>ul li>a {
+  font-size: 18px;
+  font-weight: none;
+}
+
+
+/* footer 영역  */
+footer {
+  padding: 20px 0;
+  font-size: 18px;
+  width: 100%;
+  bottom: 0;
+  height: 200px;
+  text-align: center;
+  border-top: 2px solid #ccc;
+  background-color: #333;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+/* footer 시작 */
+footer #footer-container {
+  max-width: 1200px;
+  /* 최대 너비를 1200px로 유지 */
+  margin: 0 auto;
+  /* 가운데 정렬을 위해 추가 */
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: space-around;
+  margin-top: 75px;
+}
+
+
+footer #footer-container .footer-left img {
+  width: 60px;
+  /* 로고 크기 조절 */
+}
+
+footer #footer-container .footer-center ul {
+  list-style: none;
+  display: flex;
+}
+
+footer #footer-container .footer-left,
+footer #footer-container .footer-center,
+footer #footer-container .footer-right{
+  position: absolute;
+}
+
+footer #footer-container .footer-left{
+  left: 0;
+}
+footer #footer-container .footer-left p{
+  margin-top: 10px;
+}
+
+footer #footer-container .footer-center{
+  left: 38%;
+  top: -25px;
+}
+
+footer #footer-container .footer-right{
+  right: 0;
+}
+
+footer #footer-container .footer-center ul li {
+  margin-right: 20px;
+}
+
+footer #footer-container .footer-center ul li a {
+  text-decoration: none;
+  color: #fff;
+}
+
+footer #footer-container .footer-right > p,
+footer #footer-container .footer-right .social-links a {
+  margin: 5px 5px 0 5px;
+  color: #fff;
+}
+
+footer #footer-container .footer-right>.social-links {
+  margin-top: 5px;
+}
+
+.social-links a {
+  margin-right: 10px;
+}
+
+/* Copyright Information */
+.copyright {
+  margin-top: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* footer 영역 종료 */
+
+/* footer | 클릭 시 맨 위로 올라가게 */
+#to-top {
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
+  background-color: #333;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  display: none;
+  position: fixed;
+  text-align: center;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9;
+}
+
+#to-top.show {
+  display: block;
+}
+
+#to-bottom {
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
+  background-color: #333;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  display: none;
+  position: fixed;
+  text-align: center;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9;
+  transform: rotate(180deg);
+}
+
+#to-bottom.show {
+  display: block;
+}
+
+.material-icons {
+  margin-top: 1vh;
+}

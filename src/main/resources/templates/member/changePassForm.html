@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<head>
+
+    <!--사용자 css 추가-->
+    <th:block layout:fragment="css">
+        <style>
+            .fieldError{
+                color: #bd2130;
+            }
+        </style>
+    </th:block>
+
+    <!-- 사용자 js 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            $(document).ready(function(){
+                const errorMessage = [[${errorMessage}]];
+                if(errorMessage != null){
+                    alert(errorMessage);
+                }
+
+                // 버튼 활성화 함수
+                function enableCheckButton() {
+                    $("#checkButton").prop("disabled", false);
+                }
+
+                // 이메일 확인
+                $("button[name='checkEmail']").click(function() {
+                    checkCode();
+                });
+
+                function checkCode(){
+                    const memberEmail = $("#memberEmail").val();
+                    const csrfToken = $("meta[name='_csrf']").attr("content");
+
+                    $.ajax({
+                        type:"POST",
+                        url:"/members/checkEmail",
+                        dataType:"json",
+                        headers: {
+                        'X_CSRF_TOKEN':csrfToken
+                        },
+                        data:{"memberEmail":memberEmail},
+                        success:function(response){
+                            if(response === true){
+                                alert("이메일이 확인되었습니다. 비밀번호를 재설정해주세요.");
+                            }else{
+                                alert("존재하지 않는 이메일입니다.");
+                            }
+                        },
+                        error:function(jqXHR, status, error){
+                            alert("이메일 확인 중 오류 발생!", error);
+                        }
+                    });
+                }
+
+                // 인증메일 발송
+                $("button[name='sendCertCode']").click(function() {
+                    const csrfToken = $("meta[name='_csrf']").attr("content");
+                    const memberEmail = $("#memberEmail").val();
+                    const requestData = { "memberEmail": memberEmail};
+                    $.ajax({
+                        url: "/members/cert",
+                        type: "POST",
+                        contentType: "application/json",
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        data: JSON.stringify(requestData),
+                        cache: false,
+                        success: function(result, status){
+                            alert("인증번호가 발송되었습니다.");
+                        },
+                        error: function(jqXHR, status, error) {
+                            alert("인증번호 발송중 오류가 발생하였습니다.");
+                        }
+                    });
+                });
+
+                // 인증번호 확인
+                $("button[name='verifyCode']").click(function() {
+                    verifyCode();
+                });
+
+                function verifyCode() {
+                    var memberEmail = $("#memberEmail").val();
+                    var certCode = $("#certCode").val();
+                    const csrfToken = $("meta[name='_csrf']").attr("content");
+                    $.ajax({
+                        type: "POST",
+                        url: "/members/verify",
+                        contentType: "application/json",
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        data: JSON.stringify({ "memberEmail": memberEmail, "certCode": certCode }),
+                        success: function(response) {
+                            alert("인증에 성공했습니다.");
+                            enableCheckButton(true);
+                        },
+                        error: function(error) {
+                            alert("인증에 실패했습니다. 올바른 인증코드를 입력해주세요.");
+                            enableCheckButton(false); // 버튼 비활성화
+                        }
+                    });
+                }
+            });
+        </script>
+    </th:block>
+    <title>비밀번호 변경</title>
+</head>
+
+<body>
+
+
+
+<div layout:fragment="content">
+
+<!--    <form action="/members/changePassword" role="form" method="post"-->
+<!--          th:object="${memberFormDTO}">-->
+<!--        <input type="hidden" name="memberEmail" th:value="${memberEmail}">-->
+
+    <form action="/members/changePassword" role="form" method="post">
+
+        <p>본인 확인을 위해 가입하신 이메일로 인증 과정을 진행해주세요.</p>
+
+        <div class="form-group">
+            <label th:for="memberEmail">가입하신 이메일을 입력해주세요.</label>
+            <input type="email" class="form-control" id="memberEmail"
+                   name="memberEmail" placeholder="이메일 형식에 맞춰 입력해주세요">
+            <button type="button" name="checkEmail">이메일 확인</button>
+        </div>
+
+        <!-- 이메일이 존재할 경우에만 진행 가능 -->
+
+        <p>해당 이메일로 인증 번호를 받아 본인 확인을 진행해주세요.</p>
+        <div class="input-box">
+            <label><button type="button"  name="sendCertCode" >인증번호발송</button></label>
+            <input type="text" class="input-field join-number" placeholder="인증번호"
+                   id="certCode" required>
+            <div id="timer"></div>
+            <button type="button" name="verifyCode">확인</button>
+        </div>
+
+        <div class="form-group">
+            <label for="memberPwd">새로운 비밀번호_</label>
+            <input type="password" class="form-control" id="memberPwd"
+                   name="memberPwd" placeholder="4~20자 사이로 설정해주세요">
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="checkButton" disabled>변경하기</button>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+    </form>
+</div>
+</body>
+</html>

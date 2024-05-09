@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security5">
+
+<th:block layout:fragment="script">
+
+    <script th:inline="javascript">
+
+    // 현재 페이지의 URL을 가져오는 함수
+    function getCurrentUrl() {
+        return window.location.pathname;
+    }
+
+    // 현재 페이지의 URL과 각 메뉴 항목의 URL을 비교하여 활성 클래스를 추가하는 함수
+    function setActiveMenu() {
+        let currentUrl = getCurrentUrl();
+        let navLinks = document.querySelectorAll('.nav-link');
+
+        navLinks.forEach(function(navLink) {
+            if (navLink.getAttribute('href') === currentUrl) {
+                navLink.parentNode.classList.add('active');
+            }
+        });
+    }
+
+    // 페이지가 로드될 때 setActiveMenu 함수 호출
+    window.onload = setActiveMenu;
+    </script>
+</th:block>
+
+<div th:fragment="header">
+
+    <section class="intro" th:if="${isFirstPage}">
+        <h2 class="intro__title hidden">새들에 대한 이해와 애정을 높이는 여정에 여러분을 초대합니다.</h2>
+        <div class="intro__background intro__background--left"></div>
+        <div class="intro__background intro__background--right"></div>
+    </section>
+
+
+    <!-- Start Header/Navigation -->
+    <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">Birdys<span>.</span></a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarsFurni">
+                <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
+                    <li class="nav-item active"><a class="nav-link" th:href="@{/}">홈</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/bird/birds}">새의 앨범</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/members/news}">과학 + 새</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/board/paging}">게시판</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/members/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/bird/birdy}">새의 탐조</a></li>
+                </ul>
+
+                <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
+                    <li sec:authorize="isAnonymous()"><a class="nav-link" th:href="@{/members/login}"><img th:src="@{/images/free-icon-login.png}" width="38px" height="40px" alt="로그인"/></a></li>
+                    <li sec:authorize="isAuthenticated()"><a class="nav-link" th:href="@{/members/logout}"><img th:src="@{/images/free-icon-logout.png}" width="18px" height="20px" alt="로그아웃"/></a></li>
+                    <li sec:authorize="hasAnyAuthority('ROLE_MEMBER')"><a class="nav-link" th:href="@{/myPage/myPage_main}"><img th:src="@{/images/user.svg}" alt="마이페이지"/></a></li>
+                    <li sec:authorize="hasAnyAuthority('ROLE_ADMIN')"><a class="nav-link" th:href="@{/admin/admins}"><img th:src="@{/images/free-icon-administrator.png}" width="18px" height="20px" alt="관리자페이지"/></a></li>
+
+
+                </ul>
+            </div>
+        </div>
+
+    </nav>
+    <!-- End Header/Navigation -->
+
+</div>
+</html>

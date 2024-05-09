@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+<meta name="_csrf" th:content="${_csrf.token}"/>
+
+<head>
+<!--사용자 css 추가-->
+    <style>
+        .fieldError{
+            color: #bd2130;
+        }
+    </style>
+
+<!-- 사용자 js 추가 -->
+    <script th:inline="javascript">
+        $(document).ready(function(){
+            const errorMessage = [[${errorMessage}]];
+            if(errorMessage != null){
+                alert(errorMessage);
+            }
+
+            // 가입 버튼 활성화 함수
+            function enableSignUpButton() {
+                $("#signUpButton").prop("disabled", false);
+            }
+
+            // 인증메일 발송
+            $("button[name='sendCertCode']").click(function() {
+                const csrfToken = $("meta[name='_csrf']").attr("content");
+                const memberEmail = $("#memberEmail").val();
+                const requestData = {"memberEmail": memberEmail};
+                $.ajax({
+                    url: "/members/cert",
+                    type: "POST",
+                    contentType: "application/json",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: JSON.stringify(requestData),
+                    cache: false,
+                    success: function(result, status){
+                        alert("인증번호가 발송되었습니다.");
+                    },
+                    error: function(jqXHR, status, error) {
+                        alert("인증번호 발송중 오류가 발생하였습니다.");
+                        console.error("인증번호 발송중 오류가 발생하였습니다.", error);
+                    }
+                });
+            });
+
+            // 인증번호 확인
+            $("button[name='verifyCode']").click(function() {
+                verifyCode();
+            });
+
+            function verifyCode() {
+                var memberEmail = $("#memberEmail").val();
+                var certCode = $("#certCode").val();
+                const csrfToken = $("meta[name='_csrf']").attr("content");
+                $.ajax({
+                    type: "POST",
+                    url: "/members/verify",
+                    contentType: "application/json",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: JSON.stringify({ "memberEmail": memberEmail, "certCode": certCode }),
+                    success: function(response) {
+                        alert("인증에 성공했습니다.");
+                        enableSignUpButton(true);
+                    },
+                    error: function(error) {
+                        alert("인증에 실패했습니다. 올바른 인증코드를 입력해주세요.");
+                        enableSignUpButton(false); // 버튼 비활성화
+                    }
+                });
+            }
+        });
+
+        function bindDomEvent(){
+          $(".custom-file-input").on("change", function(){
+            let fileName = $(this).val().split("\\").pop();
+            let fileExt = fileName.substring(fileName.lastIndexOf(".")+1);
+            console.log("파일명 --->" , fileName);
+            console.log("fileExt --->" , fileExt);
+
+            fileExt = fileExt.toLowerCase();
+
+            if(fileExt != "jpg" && fileExt != "jpeg" && fileExt != "gif"
+              && fileExt != "png" && fileExt != "bmp"){
+              alert("이미지 파일만 등록 가능합니다(jpg, jpeg, gif, png, bmp)");
+              return;
+            }
+            $(this).siblings(".custom-file-label").html(fileName);
+          });
+        }
+        bindDomEvent();
+    </script>
+
+    <title>회원가입</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <!--부트 forms 가져오기-->
+    <form action="/members/new" role="form" enctype="multipart/form-data" method="post"
+          th:object="${memberFormDTO}">
+        <!--th:object = memberFormDTO의 DTO가 값을 받는다-->
+        <!--action 태그 th 방식으로 사용가능 = th:action="@{/member/new}"-->
+
+        <!--<input name="name"> == th:field="*{name}"-->
+        <!--th:if="${#fields.hasErrors('name'):name}"
+                =fields 에서 에러 발생시, 타임리프 스프링 검증 오류 기능(BindingResult)사용하여
+                    #fields에 접근한다.
+                =컨트롤러에서 바인딩리절트에 의해 에러가 잡히면 th:error 를 출력한다.
+                -->
+
+        <div class="form-group">
+            <label th:for="memberName">이름_</label>
+            <input type="text" class="form-control" id="memberName"
+                   th:field="*{memberName}" placeholder="이름을 입력해주세요">
+            <!-- thymeleaf 에서 *{}은 변수를 부여하는 형식이다-->
+            <!-- 따로 설정하지 않았어도 일반적 문법에 따라 field's' = field '들' 중에..라는 의미로 인식되어 사용된다-->
+            <p th:if="${#fields.hasErrors('memberName')}"
+               th:error="*{memberName}" class="fieldError">Incorrect data_nm</p>
+        </div>
+
+        <div class="form-group">
+            <label th:for="memberEmail">이메일(로그인과 인증에 필요)_
+                <span style="color:red;">*</span></label>
+            <input type="email" class="form-control" id="memberEmail"
+                   th:field="*{memberEmail}" placeholder="이메일을 입력해주세요">
+            <p th:if="${#fields.hasErrors('memberEmail')}"
+               th:error="*{memberEmail}" class="fieldError">Incorrect data_em</p>
+        </div>
+        <div class="input-box">
+            <label><button type="button"  name="sendCertCode">인증번호발송</button></label>
+            <input type="text" class="input-field join-number" placeholder="인증번호"
+                   id="certCode" required>
+            <div id="timer"></div>
+            <button type="button" name="verifyCode">확인</button>
+        </div>
+
+
+        <div class="form-group">
+            <label for="memberPwd">비밀번호_</label>
+            <!-- address, password 를 인식하지 못 해서 id 추가함-->
+            <input type="password" class="form-control" id="memberPwd"
+                   th:field="*{memberPwd}" placeholder="비밀번호를 입력해주세요">
+            <p th:if="${#fields.hasErrors('memberPwd')}"
+               th:error="*{memberPwd}" class="fieldError">Incorrect data_pw</p>
+        </div>
+
+        <div class="form-group">
+            <label for="memberPhone">연락처_</label>
+            <input type="text" class="form-control" id="memberPhone"
+                   th:field="*{memberPhone}" placeholder="연락처를 입력해주세요">
+            <p th:if="${#fields.hasErrors('memberPhone')}"
+               th:error="*{memberPhone}" class="fieldError">Incorrect data_ad</p>
+        </div>
+
+<!--프로필이미지 등록-->
+        <!-- 상품 이미지 등록 -->
+        <!-- 프로필이미지 등록 -->
+        <div class="form-group">
+            <label for="profileDTO">프로필 이미지 등록_</label>
+            <div class="custom-file img-div">
+                <input type="file" class="custom-file-input" id="profileDTO" name="profileFile" required>
+                <label class="custom-file-label" for="profileDTO">프로필 이미지를 등록해주세요.</label>
+                <p th:if="${#fields.hasErrors('profileDTO')}" th:error="*{profileDTO}" class="fieldError"></p>
+            </div>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary" id="signUpButton" disabled>가입</button>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+
+    </form>
+</div>
+</body>
+</html>

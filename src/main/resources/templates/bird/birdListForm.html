@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<head>
+    <title>새의 종류</title>
+</head>
+
+
+
+
+<!-- body -->
+<div layout:fragment="content">
+
+    <div>
+        <form th:action="@{/bird/birds}" method="get">
+            <button type="submit" name="groupValue" value="GA">ㄱ</button>
+            <button type="submit" name="groupValue" value="NA">ㄴ</button>
+            <button type="submit" name="groupValue" value="DA">ㄷ</button>
+            <button type="submit" name="groupValue" value="MA">ㄹ</button>
+            <button type="submit" name="groupValue" value="BA">ㅂ</button>
+            <button type="submit" name="groupValue" value="SA">ㅅ</button>
+            <button type="submit" name="groupValue" value="AA">ㅇ</button>
+            <button type="submit" name="groupValue" value="JA">ㅈ</button>
+            <button type="submit" name="groupValue" value="CHA">ㅊ</button>
+            <button type="submit" name="groupValue" value="KA">ㅋ</button>
+            <button type="submit" name="groupValue" value="TA">ㅌ</button>
+            <button type="submit" name="groupValue" value="PA">ㅍ</button>
+            <button type="submit" name="groupValue" value="HA">ㅎ</button>
+            <button type="submit" name="groupValue" value="I">I급</button>
+            <button type="submit" name="groupValue" value="II">II급</button>
+        </form>
+    </div>
+
+    <h1 th:text="${birdList != null and not #lists.isEmpty(birdList) ? birdList[0].birdGroup : 'Unknown'}">Bird Group</h1>
+
+    <div class="wrap">
+        <div th:each="bird : ${birdList}" th:id="${bird.id}" class="container">
+            <img class="pic_bird" th:src="${bird.birdImgUrl}" th:alt="${bird.birdName}">
+            <h3 th:text="${bird.birdName}">${bird.birdName}</h3>
+            <p th:text="${bird.birdDetail}"></p>
+        </div>
+    </div>
+
+
+
+</div>
+
+</html>

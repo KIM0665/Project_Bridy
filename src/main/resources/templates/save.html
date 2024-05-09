@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+
+    <title>save</title>
+
+    <div layout:fragment="content">
+<!-- action속성: 목적지(서버주소), method속성: http request method(get, post) -->
+<form action="/board/save" method="POST" enctype="multipart/form-data">
+    writer: <input type="text" name="adminBoardId"> <br>
+    title: <input type="text" name="boardTitle"> <br>
+    pass: <input type="text" name="boardPass"> <br>
+    contents: <textarea name="boardContent" cols="30" rows="10"></textarea> <br>
+    file: <input type="file" name="boardFile" multiple> <br>
+    <input type="submit" value="글작성">
+</form>
+    </div>
+</html>

@@ -1,0 +1,332 @@
+<!-- /*
+* Bootstrap 5 / main.html
+* Template Name: Furni
+* Template Author: Untree.co
+* Template URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate='~{layouts/layout1}'>
+
+
+
+<th:block layout:fragment="script">
+
+	<script th:inline="javascript">
+
+
+      const token = $("meta[name='_csrf']").attr("content");
+      const header = $("meta[name='_csrf_header']").attr("content");
+
+	document.addEventListener('DOMContentLoaded', function () {
+      // 페이지 로드 시 초기 데이터를 가지고 그래프를 그립니다.
+    var birdData = [[${birdCount}]];
+    var birdLabels = Object.keys(birdData);
+    var birdCounts = Object.values(birdData);
+    console.log(birdData);
+
+    let birdChart = new Chart(document.getElementById("bird-chat"), {
+        type: 'bar',
+        data: {
+            labels: birdLabels,
+            datasets: [{
+                label: '개체수',
+                data: birdCounts,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    });
+		// 페이지 이동 시에 호출되는 함수
+    function updateBirdChart(birdData) {
+        // 새로운 데이터로 그래프를 업데이트합니다.
+        var birdLabels = Object.keys(birdData);
+        var birdCounts = Object.values(birdData);
+
+        birdChart.data.labels = birdLabels;
+        birdChart.data.datasets[0].data = birdCounts;
+        birdChart.update();
+    }
+
+
+	</script>
+</th:block>
+<th:block layout:fragment="css">
+	<style>
+		.intro {
+    position: fixed;
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    width: 100%;
+    background-color: white;
+    z-index: 1115;
+  }
+
+  .intro__title {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 75%;
+    text-align: center;
+    line-height: 85px;
+    font-size: 40px;
+    mix-blend-mode: difference;
+    z-index: 2;
+    transform: translateY(40px);
+  }
+
+  .intro__background {
+    position: absolute;
+    top: 0;
+    background-color: black;
+    width: 50%;
+    height: 100%;
+    transform: scaleX(0);
+  }
+
+  .intro__background--left {
+    left: 0;
+    transform-origin: left center;
+  }
+
+  .intro__background--right {
+    left: 50%;
+    transform-origin: right center;
+  }
+		.science, .news, .past, .meta{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .new-news, .past-news, .science-news{
+            text-align: center;
+        }
+        .science p, .news p, .past p,
+        .science h3, .news h3, .past h3, .meta span{
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+	</style>
+</th:block>
+<div layout:fragment="content">
+
+
+
+	<!-- Start Hero Section -->
+	<div class="hero">
+		<div class="container">
+			<div class="row justify-content-between">
+				<div class="col-lg-5">
+					<div class="intro-excerpt">
+						<h1>새의 아름다움과<span class="d-block">지식 공간</span></h1>
+						<p class="mb-4">새의 통계와 커뮤니티를 제공하여 <br>다양한 사람들과 함께 지식을 공유하는 공간입니다."</p>
+						<p><a th:href="@{/bird/birds}" class="btn btn-secondary me-2">새의 앨범</a><a th:href="@{/board/list}" class="btn btn-white-outline">커뮤니티</a></p>
+					</div>
+				</div>
+				<div class="col-lg-7">
+					<div class="hero-img-wrap">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End Hero Section -->
+
+	<!-- Start Product Section -->
+	<div class="product-section">
+		<div class="container">
+			<div class="row">
+
+				<!-- Start Column 1 -->
+				<div>
+					<h2 class="mb-4 section-title center">새의 통계</h2>
+					<p class="mb-4 center">2019년 새의 개체수</p>
+					<!--						<p><a href="shop.html" class="btn">Explore</a></p>-->
+				</div>
+				<canvas id="bird-chat" width="1320" height="250"></canvas>
+
+				<div class="container">
+					<div class="row grid_border">
+						<table border="1">
+							<!-- 테이블 헤더: 도시 이름 -->
+							<thead>
+							<tr>
+								<th>새 이름</th>
+								<!-- 각 도시의 이름 -->
+								<th th:each="birdDosi : ${birdList}" th:text="${birdDosi.key}"></th>
+							</tr>
+							</thead>
+							<!-- 테이블 바디: 개체수 -->
+							<tbody>
+							<!-- 각 새의 이름에 대해 -->
+							<tr th:each="birdEntry : ${birdPage.content}">
+								<td th:text="${birdEntry.key}"></td>
+								<!-- 각 새의 이름에 해당하는 도시별 개체수 -->
+								<td th:each="birdDosi : ${birdList}">
+									<!-- 해당 도시가 존재하는지 확인 -->
+									<span th:if="${birdEntry.value.containsKey(birdDosi.key)}"
+										  th:text="${birdEntry.value.get(birdDosi.key)}"></span>
+									<!-- 해당 도시가 존재하지 않으면 0 표시 -->
+									<span th:unless="${birdEntry.value.containsKey(birdDosi.key)}">-</span>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+						<!-- 페이지 번호 표시 -->
+						<div th:if="${birdPage.getTotalPages() > 1}" style="margin: 20px 0 0 0;">
+							<ul class="pagination justify-content-center">
+								<!-- 처음으로 버튼 -->
+								<li th:class="${birdPage.first ? 'disabled' : ''}" th:unless="${birdPage.first}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=1'}">처음으로</a>
+								</li>
+								<!-- 이전 버튼 -->
+								<li th:class="${birdPage.hasPrevious() ? '' : 'disabled'}" th:unless="${birdPage.first}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=' + ${birdPage.number}}">이전</a>
+								</li>
+								<!-- 페이지 번호 -->
+								<li th:each="i : ${#numbers.sequence((birdPage.number / 10) * 10, (birdPage.number / 10) * 10 + 9)}" th:class="${birdPage.number == i ? 'active' : ''}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=' + ${i+1}}" onclick="updateBirdChart(/*[[${birdCount}]]*/);">[[${i+1}]]</a>
+								</li>
+								<!-- 다음 버튼 -->
+								<li th:class ="${birdPage.hasNext() ? '' : 'disabled'}">
+									<a class="btn btn-primary btn-sm" th:if="${birdPage.hasNext()}" th:href="@{'/?page=' + ${birdPage.number +2}}">다음</a>
+								</li>
+								<!-- 끝 버튼 -->
+								<li th:class="${birdPage.last ? 'disabled' : ''}" th:unless="${birdPage.last}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=' + ${birdPage.getTotalPages()}}">끝</a>
+								</li>
+
+							</ul>
+						</div>
+					</div>
+					<!-- End Product Section -->
+
+					<!-- 게시판 세션 -->
+					<!-- Start Why Choose Us Section -->
+					<div class="why-choose-section">
+						<div class="container">
+							<div class="row justify-content-between">
+								<div class="col-lg-6">
+									<h2 class="section-title">커뮤니티 게시판</h2>
+									<p>자신이 알고 있는 지식을 사람들에게 공유해 보세요</p>
+
+									<div class="row my-5">
+
+										<div class="col-10 col-md-8">
+											<div class="feature">
+												<table>
+													<tr>
+														<th>번호</th>
+														<th>제목</th>
+														<th>내용</th>
+														<th>작성일자</th>
+														<th>조회수</th>
+													</tr>
+													<tr th:each="board : ${boardList}" th:limit="5">
+														<td th:text="${board.id}"></td>
+														<td><a th:href="@{|/board/${board.id}|}" th:text="${board.boardTitle}"></a></td>
+														<td th:text="${board.adminBoardId}"></td>
+														<td th:text="*{#temporals.format(board.BoardCreatedTime, 'yyyy-MM-dd')}"></td>
+														<td th:text="${board.boardHits}"></td>
+													</tr>
+												</table>
+											</div>
+										</div>
+
+									</div>
+								</div>
+
+								<div class="col-lg-5">
+									<div class="img-wrap">
+										<img th:src="@{images/오색딱따구리.jpg}" alt="Image" class="img-fluid">
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+					<!-- End Why Choose Us Section -->
+
+					<!-- Start We Help Section -->
+					<div class="we-help-section">
+						<div class="container">
+							<div class="row justify-content-between">
+								<div class="col-lg-5 ps-lg-5">
+									<h2 class="section-title mb-4">과학 뉴스</h2>
+									<p>새의 대한 소식을 듣고 싶다면 아래와 같이 뉴스 정보가 보입니다!</p>
+
+									<ul class="list-unstyled custom-list my-4">
+										<li th:each="science : ${scienceNews}" class="science">
+											<a th:text="${science.birdysScienceonTitle}" th:href="${science.birdysScienceonSource}" style="text-decoration: none; font-size: 20px;"></a>
+											<p th:text="${science.birdysScienceonContent}"></p>
+										</li>
+									</ul>
+									<p><a herf="#" class="btn">뉴스 보러가기</a></p>
+								</div>
+								<div class="col-lg-5 ps-lg-5">
+									<h2 class="section-title mb-4">최신 뉴스</h2>
+									<p>새의 대한 소식을 듣고 싶다면 아래와 같이 뉴스 정보가 보입니다!</p>
+
+									<ul class="list-unstyled custom-list my-4">
+										<li th:each="news : ${newNews}" class="news">
+											<a th:text="${news.birdysNewsTitle}" th:href="${news.birdysNewsSource}" style="text-decoration: none; font-size: 20px;"></a>
+											<p th:text="${news.birdysNewsContent}"></p>
+										</li>
+									</ul>
+									<p><a herf="#" class="btn">뉴스 보러가기</a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End We Help Section -->
+
+					<!-- Start Blog Section -->
+					<div class="blog-section">
+						<div class="container">
+							<div class="row mb-5">
+								<div class="col-md-6">
+									<h2 class="section-title">새의 앨범</h2>
+								</div>
+								<div class="col-md-6 text-start text-md-end">
+									<a href="#" class="more">새의 앨범 이동</a>
+								</div>
+							</div>
+
+							<div class="row">
+
+
+								<div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0" th:each="bird : ${birdblog}" th:id="${bird.id}">
+									<div class="post-entry">
+										<a href="#" class="post-thumbnail"><img th:src="${bird.birdImgUrl}" th:alt="${bird.birdName}" class="img-fluid"></a>
+										<div class="post-content-entry">
+											<h3 th:text="${bird.birdName}">${bird.birdName}</h3>
+											<div class="meta">
+												<span th:text="${bird.birdDetail}"></span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							</div>
+						</div>
+					</div>
+					<!-- End Blog Section -->
+
+				</div>
+			</div>
+		</div>
+</html>

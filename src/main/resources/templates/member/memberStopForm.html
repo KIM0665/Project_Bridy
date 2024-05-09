@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+<meta name="_csrf" th:content="${_csrf.token}"/>
+
+<head>
+    <!--사용자 css 추가-->
+<th:block layout:fragment="css">
+    <style>
+        .fieldError{
+            color: #bd2130;
+        }
+    </style>
+</th:block>
+
+<!-- 사용자 js 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(document).ready(function(){
+            const errorMessage = [[${errorMessage}]];
+            if(errorMessage != null){
+                alert(errorMessage);
+            }
+
+            // 회원 탈퇴 진행 확인창
+            $("#outButton").click(function() {
+                if (confirm("정말 정말 탈퇴하실건가요...?")) {
+                    // 확인이 클릭된 경우 true 값이 되어 메서드 호출, 탈퇴 진행.
+                    withdraw();
+                }
+            });
+
+            // 회원 탈퇴 함수
+            function withdraw() {
+                var memberEmail = $("#memberEmail").val();
+                var certCode = $("#certCode").val();
+                const csrfToken = $("meta[name='_csrf']").attr("content");
+                $.ajax({
+                    type: "POST",
+                    url: "/myPage/memberStop",
+                    contentType: "application/json",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: JSON.stringify({ "memberEmail": memberEmail, "certCode": certCode }),
+                    success: function(response) {
+                     alert("회원 탈퇴가 완료되었습니다.");
+                     // 회원 탈퇴가 완료되면 메인 페이지로 이동
+                    window.location.href = "/";
+                },
+                error: function(error) {
+                    alert("회원 탈퇴 중 오류가 발생했습니다.");
+                    console.error("회원 탈퇴 중 오류가 발생했습니다.", error);
+                }
+        });
+    }
+});
+</script>
+</th:block>
+
+    <title>탈퇴하기</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+    <form th:action="@{/myPage/memberStop}" role="form" method="post">
+
+        <p>안녕하세요, [<span th:text="${member.memberName}"></span>]님.<br>
+            회원 탈퇴시, 동일 메일로 재가입이 불가합니다.<br>
+            정말 탈퇴하시겠습니까?</p>
+
+        <input type="hidden" id="memberEmail" name="memberEmail" th:value="${member.memberEmail}">
+
+        <button type="submit" class="btn btn-primary" id="outButton">정말 탈퇴하기</button>
+        <button type="button" class="btn btn-primary"
+                onclick="location.href='/myPage/myPage_main'">취소, 돌아가기</button>
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+                xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>birdys</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Untree.co">
+    <link rel="shortcut icon" href="favicon.png">
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap4" />
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+
+
+    <!-- 아이콘 라이브러리 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <script src="https://kit.fontawesome.com/9d06c79ea2.js" crossorigin="anonymous"></script>
+
+    <!-- chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <!-- start : intro 관련 라이브러리    -->
+
+    <!-- Gsap & ScrollToPlugin -->
+    <!-- Gsap은 웹 애니메이션을 도와주는 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
+            integrity="sha512-16esztaSRplJROstbIIdwX3N97V1+pZvV33ABoG1H2OyTttBxEGkTsoIVsiP1iaTtM8b3+hu2kB6pQ4Clr5yug=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- 유틸리티 라이브러리 배열 조작, 데이터 변환, 함수 조합 등을 지원-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"
+            integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Gsap와 같이 사용하여 스크롤 애니메이션에서 특정 위치에 자연스럽게 할 수 있도록 도와주는 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"
+            integrity="sha512-v/m68W+vaGN/6igoyFpd4GlQzu0jx9/n5gr2PKq5vif+RObyGKHse384YHrOULaxZ810XhlHUrmB3U8UnPB19Q=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- 스크롤 애니메이션을 만들기 위한 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"
+            integrity="sha512-8E3KZoPoZCD+1dgfqhPbejQBnQfBXe8FuwL4z/c8sTrgeDMFEnoyTlH3obB4/fV+6Sg0a0XF+L/6xS4Xx1fUEg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"
+            integrity="sha512-8E3KZoPoZCD+1dgfqhPbejQBnQfBXe8FuwL4z/c8sTrgeDMFEnoyTlH3obB4/fV+6Sg0a0XF+L/6xS4Xx1fUEg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <link rel="apple-touch-icon"
+          href="https://static.wixstatic.com/media/9f3881_127435022ad34cc78334dda50577d5d1%7Emv2.png/v1/fill/w_180%2Ch_180%2Clg_1%2Cusm_0.66_1.00_0.01/9f3881_127435022ad34cc78334dda50577d5d1%7Emv2.png"
+          type="image/png">
+    <!-- end : intro 관련 라이브러리    -->
+
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/tiny-slider.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+
+
+
+<!--    <link th:href="@{/css/layout1.css}" rel="stylesheet">-->
+
+    <script defer th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script defer th:src="@{/js/tiny-slider.js}"></script>
+    <script defer th:src="@{/js/custom.js}"></script>
+    <script defer th:src="@{/js/intro.js}"></script>
+
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=1b270d8c9e6487e1ade9452321b19ebe&libraries=clusterer"></script>
+
+
+
+
+
+    <th:block layout:fragment="script"></th:block>
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body>
+    <div th:replace="fragments/header::header"></div>
+    <div layout:fragment="content" class="content">
+
+
+    </div>
+    <div th:replace="fragments/footer::footer"></div>
+</body>
+</html>

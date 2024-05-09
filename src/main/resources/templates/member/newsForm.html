@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <title>Register News</title>
+</head>
+<body>
+<h1>Register News</h1>
+<form th:action="@{/register}" th:object="${news}" method="post">
+    <p>ID: <input type="text" th:field="*{birdysNewsId}" /></p>
+    <p>Title: <input type="text" th:field="*{birdysNewsTitle}" /></p>
+    <p>Content: <input type="text" th:field="*{birdysNewsContent}" /></p>
+    <p>Source: <input type="text" th:field="*{birdysNewsSource}" /></p>
+<!--    <p>Date (YYYY-MM-DD): <input type="date" th:field="*{birdysNewsRegisterDate}" /></p>-->
+    <p><button type="submit">Register</button></p>
+</form>
+</body>
+</html>

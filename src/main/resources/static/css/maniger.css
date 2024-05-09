@@ -1,0 +1,234 @@
+/* 공용(헤더, 푸터, 사이드메뉴)추가 코드 조정 */
+.top-menu {
+    margin: 20px 30px 0 0;
+}
+.icon-container {
+    z-index: 3;
+    margin-top: 70px;
+}
+header .top-menu {
+    position: fixed;
+    z-index: 5;
+}
+.icon-container .menu_section {
+    margin-left: -60px;
+}
+header .logo{
+    /* 상단로고 */
+    position: fixed;
+    z-index: 6;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgb(101, 101, 101);
+    border-radius: 50%;
+    top: 10px;
+    left: 40px;
+}
+header .logo h1 a{
+    cursor: pointer;
+    color: black;
+    font-size: 35px;
+}
+
+header .top-menu {
+    position: fixed;
+    /* 항상 상단에 고정 */
+    z-index: 5;
+    /* 다른 요소에 가려지지 않도록 우선순위 */
+    background: white;
+    /* background: linear-gradient(to bottom, white, 95%, rgba(255,255,255,0.2)); */
+    width: 100%;
+    margin: 0;
+    padding: 30px 20px 0 0;
+    height: 60px;
+}
+/* 사이드 메뉴 화면에 붙도록 조절 */
+.icon-container .menu_section {
+    margin-top: -100px;
+    margin-left: -100px;
+    background: linear-gradient(to top left, rgba(116, 116, 116, 0.3), rgba(255,255,255,0.8),white,white);
+    border-radius: 0 20px 20px 0;
+    padding: 20px;
+}
+/* 헤어 top메뉴 글씨 라인 */
+.top-menu .menu-list li::after{
+    /* 공용의 bottom 값 주석처리해놓았음 */
+    top:25px;
+}
+
+/* 사이트명: 버디(임시) */
+#maniger-header .logo h1{
+    margin-left: 100px;
+    margin-top: -160px;
+    font-size: 40px;
+    font-family: 'GangwonEdu_OTFBoldA';
+    color: black;
+    letter-spacing: 1px;
+    /* 왜인지 글자간격 넓어서 좁힘 */
+}
+
+
+
+/* 본문 */
+/* body */
+#m-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 헤더 */
+#maniger-header {
+    height: 300px;
+    background-image: url(/pic_bird/m_11.jpg);
+    opacity: 0.9;
+    /* 영역의 불투명도 */
+    display: flex;
+    overflow: hidden;
+}
+
+.wave {
+    position: absolute;
+    opacity: 0.5;
+    /* 반투명하게 */
+    top: 3%;
+    left: 50%;
+    /* 화면 크기가 바뀌어도 일정할 수 있도록 위치 %로 조정 */
+    background: rgb(147, 221, 246);
+    width: 450px;
+    height: 450px;
+    /* 요소의 크기 */
+    margin-left: -200px;
+    margin-top: -220px;
+    /* 요소의 위치, 반만 보이게 조정 */
+    transform-origin: 48%;
+    /* 요소가 움직이는 기준 중심점 잡기 */
+    border-radius: 45%;
+    animation: drift 5s infinite linear;
+    z-index: -1;
+    /* 우선순위는 가장 뒤로 보내어 제목이 가려지지 않도록 함 */
+}
+
+.wave_tow {
+    position: absolute;
+    opacity: 0.5;
+    top: 3%;
+    left: 50%;
+    background: rgb(106, 177, 235);
+    width: 450px;
+    height: 450px;
+    margin-left: -200px;
+    margin-top: -210px;
+    transform-origin: 50%;
+    border-radius: 45%;
+    animation: drift 8s infinite linear;
+    z-index: -1;
+}
+
+.wave_three {
+    position: absolute;
+    opacity: 0.5;
+    top: 3%;
+    left: 50%;
+    background: rgb(130, 177, 203);
+    width: 450px;
+    height: 450px;
+    margin-left: -200px;
+    margin-top: -220px;
+    border-radius: 45%;
+    animation: drift 7s infinite linear;
+    z-index: -1;
+}
+
+@keyframes drift {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+    /* 애니메이션, 회전 */
+}
+
+/* 팀명, 제목 */
+#maniger-header h1 {
+    width: 100%;
+    margin:0 auto;
+    line-height: 250px;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.1em;
+    color: rgb(255, 255, 255);
+    font-size: 35px;
+}
+#maniger-header h1 > a{
+    color: black;
+}
+
+#maniger-header h1 > a:hover{
+    color: #a0bdcc;
+    transition: all 0.8s ease-in-out;
+}
+
+/* 메인 */
+#maniger-main {
+    padding: 5%;
+    margin-top: 150px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    background-image: linear-gradient(to bottom, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #fcfcff, #f9faff, #f5f7ff, #eaf2ff, #dceeff, #ccebff, #b9e8ff);
+}
+
+/* 메인-div */
+.maniger_Mdiv {
+    border-radius: 10px;
+    background: rgb(54, 57, 59);
+    height: 20px;
+    width: 400px;
+    line-height: 100px;
+    padding-left: 20px;
+    padding-bottom: 50px;
+    color: white;
+    margin: 10px;
+    cursor: pointer;
+}
+
+/* 리스트 제목 */
+.maniger_Mdiv h4 a {
+    font-family: 'GangwonEdu_OTFBoldA';
+    font-size: 22px;
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: rgb(214, 214, 214);
+}
+
+/* 메인-리스트-ul */
+.Mdiv_list {
+    display: none;
+    list-style: none;
+    color: rgb(82, 80, 86);
+    width: 100%;
+    font-size: 50px;
+    font-family: 'TAEBAEKmilkyway';
+    letter-spacing: 0.2em;
+    margin-left: 50px;
+    margin-top: -10px;
+}
+.maniger_Mdiv h4:hover{
+    color: #a0bdcc;
+}
+
+.Mdiv_list li a {
+    text-decoration: none;
+    color: rgb(214, 214, 214);
+    float: left;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    margin-right: 10%;
+}
+.Mdiv_list li a:hover{
+    color: #a0dfff;
+}

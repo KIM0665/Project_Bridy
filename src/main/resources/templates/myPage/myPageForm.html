@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+<meta name="_csrf" th:content="${_csrf.token}"/>
+
+<head>
+<!-- 사용자 css 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        .fieldError {
+            color: #bd2130;
+        }
+    </style>
+</th:block>
+
+<!--사용자 스크립트 추가-->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(document).ready(function(){
+            const errorMessage = [[${errorMessage}]];
+            if(errorMessage){
+                alert(errorMessage);
+            }
+        });
+    </script>
+</th:block>
+
+    <title>마이페이지</title>
+</head>
+
+<body>
+
+<!-- 마이페이지 -->
+<div layout:fragment="content">
+    <p>
+        <a th:href="@{'/myPage/myPage_main/' + ${member.id}}" class="btn btn-secondary me-2">MyPage_Main</a>
+        <a th:href="@{'/myPage/myPage_list/' + ${member.id}}" class="btn btn-secondary me-2">My List</a>
+        <a th:href="@{'/myPage/myPage_reple/' + ${member.id}}" class="btn btn-secondary me-2">My Reple</a>
+    </p>
+
+<div class="row">
+    <div class="col-12">
+        <div class="form-group">
+            <p>프로필 이미지:</p>
+            <img th:src="@{'/myPage/profile/' + ${member.memberEmail}}" style="max-width: 200px;" alt="프로필 이미지"/>
+        </div>
+    </div>
+</div>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="form-group">
+                <p>회원번호 : <span th:text="${member.id}"></span></p>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <p>이름 : <span th:text="${member.memberName}"></span></p>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <p>이메일 : <span th:text="${member.memberEmail}"></span></p>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <p>연락처 : <span th:text="${member.memberPhone}"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <a th:href="@{update}" class="btn btn-secondary me-2">수정하기</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <a th:href="@{memberStop}" class="btn btn-secondary me-2">탈퇴하기</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout=http://www.ultraq.net.nz/thymeleaf/layout
+      layout:decorate='~{layouts/layout1}'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 목록</title>
+    <th:block layout:fragment="css">
+        <style>
+            .content{
+                width: 1200px;
+                margin: 0 auto;
+                text-align: center;
+            }
+            table{
+                width: 100%;
+                display: inline-block;
+            }
+             th, td {
+                text-align: center;
+                border: 1px solid black;
+                padding: 8px; /* 원하는 패딩값으로 조정 */
+             }
+            form{
+                float: right;
+            }
+            thead, tbody{
+                width: 100%;
+                display: inline-table;
+            }
+            .close{
+                cursor: pointer;
+            }
+            a{
+                text-decoration: none;
+            }
+
+        </style>
+    </th:block>
+
+    <th:block layout:fragment="script">
+        <script>
+            // 수정 모달 창 열기
+    function openModal(id, name, email, role) {
+        let modal = document.getElementById("myModal");
+        let memberId = document.getElementById("memberId");
+        let memberName = document.getElementById("memberName");
+        let memberEmail = document.getElementById("memberEmail");
+        let memberRole = document.getElementById("memberRole");
+
+        memberId.value = memberId;
+        memberName.value = memberName;
+        memberEmail.value = memberEmail;
+        memberRole.value = memberRole;
+
+        modal.style.display = "block";
+    }
+
+    // 수정 모달 창 닫기
+    let span = document.querySelector(".close");
+    span.onclick = function() {
+        var modal = document.getElementById("myModal");
+        modal.style.display = "none";
+    }
+
+    // 모달 바깥 영역 클릭 시 닫기
+    window.onclick = function(event) {
+        let modal = document.getElementById("myModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+        </script>
+    </th:block>
+
+    <div layout:fragment="content">
+        <h1>회원 목록</h1>
+
+        <!-- 검색 폼 -->
+        <form action="/admin/search" method="GET">
+            <label for="searchTerm">검색어:</label>
+            <input type="text" id="searchTerm" name="term">
+            <button type="submit">검색</button>
+        </form>
+            <table border="1">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>이름</th>
+                    <th>Email</th>
+                    <th>역할</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- 회원 목록을 반복하며 테이블에 출력 -->
+                <tr th:each="member : ${members}">
+                    <td th:text="${member.id}"></td>
+                    <td th:text="${member.memberName}"></td>
+                    <td th:text="${member.memberEmail}"></td>
+                    <td th:text="${member.role}"></td>
+                    <td>
+                        <a th:href="@{'/admin/roleUpdate/' + ${member.id}}" onclick="openModal('${member.id}', '${member.memberName}', '${member.memberEmail}', '${member.role}')">수정</a>
+                        <a th:href="@{'/admin/delete/' + ${member.id}}" onclick="return confirm('권한을 중지 하시겠습니까?')">중지</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+
+        </div>
+</html>
