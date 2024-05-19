@@ -22,10 +22,15 @@
 
 	document.addEventListener('DOMContentLoaded', function () {
       // 페이지 로드 시 초기 데이터를 가지고 그래프를 그립니다.
-    var birdData = [[${birdCount}]];
-    var birdLabels = Object.keys(birdData);
-    var birdCounts = Object.values(birdData);
-    console.log(birdData);
+ /*<![CDATA[*/
+    const birdLabels = /*[[${birdLabels}]]*/ [];
+    const birdData = /*[[${birdData}]]*/ [];
+
+	 /*]]>*/
+
+
+
+
 
     let birdChart = new Chart(document.getElementById("bird-chat"), {
         type: 'bar',
@@ -33,7 +38,7 @@
             labels: birdLabels,
             datasets: [{
                 label: '개체수',
-                data: birdCounts,
+                data: birdData,
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1
@@ -177,7 +182,7 @@
 								<td th:each="birdDosi : ${birdList}">
 									<!-- 해당 도시가 존재하는지 확인 -->
 									<span th:if="${birdEntry.value.containsKey(birdDosi.key)}"
-										  th:text="${birdEntry.value.get(birdDosi.key)}"></span>
+										  th:text="${birdEntry.value.get(birdDosi.key)}" class="bird_value"></span>
 									<!-- 해당 도시가 존재하지 않으면 0 표시 -->
 									<span th:unless="${birdEntry.value.containsKey(birdDosi.key)}">-</span>
 								</td>

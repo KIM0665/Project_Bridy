@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,16 +33,28 @@ public class MainController {
     public String birdTest(Model model, HttpServletRequest request , @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
                            @RequestParam(defaultValue = "0") int scienceonPage)  {
 
-        // 새 지역별 개체수 파악
-        Map<String, Map<String, Long>> birdStatisticsDTOList = birdStatisticsService.getTotalCountByBirdName();
+
 
         Pageable pageable = PageRequest.of(page -1, size);
         Page<Map.Entry<String, Map<String, Long>>> birdPage = birdStatisticsService.getBirdPage(pageable);
 
         // 새 총 개체수와 새 이름 목록 가져오기
         Map<String, Long> birdList = birdStatisticsService.getTotalBirdName();
-        Map<String, Long> birdCount = birdStatisticsService.getTotalCountBirdName(page, 10);
 
+        // 새 지역별 개체수 파악
+        Map<String, Map<String, Long>> birdStatisticsDTOList = birdStatisticsService.getTotalCountByBirdName();
+
+        // birdStatisticsDTOList를 라벨과 데이터로 변환
+        List<String> birdLabels = new ArrayList<>(); // Map 키
+        List<Long> birdData = new ArrayList<>(); // Map 값
+
+        for (Map.Entry<String, Map<String, Long>> entry : birdPage.toSet()) {
+            birdLabels.add(entry.getKey()); // 새의 이름을 라벨로 추가
+
+            // 각 새의 지역별 개체수를 합산하여 데이터로 추가
+            long totalCount = entry.getValue().values().stream().mapToLong(Long::valueOf).sum();
+            birdData.add(totalCount);
+        }
         // 최초 페이지 로드 여부를 확인하는 변수
         boolean isFirstPage = false;
         // 최초 페이지 로드인지 확인
@@ -61,24 +74,21 @@ public class MainController {
 
         // 새의 통계 처리
         model.addAttribute("birdPage", birdPage); // 페이징 처리
-        model.addAttribute("birdList", birdList); // 새의 종류 개체수
-        model.addAttribute("birdStatisticsDTOList", birdStatisticsDTOList); // 종합본
-        model.addAttribute("birdCount", birdCount);
+        model.addAttribute("birdList", birdList); // 새의 총 개체수
+        model.addAttribute("birdStatisticsDTOList", birdStatisticsDTOList); // 새 지역별 개체수
+        model.addAttribute("birdLabels",birdLabels); // 새의 이름
+        model.addAttribute("birdData",birdData); // 새의 지역별 개체수
 
         // 게시판 처리
         model.addAttribute("boardList",boardDTOList); // 게시판
 
         // 최신 뉴스 페이징 처리
-        Page<NewsDTO> latestNews = newsService.findLatestNews(page, 4);
+        Page<NewsDTO> latestNews = newsService.findLatestNews(page, 4); // 최신 뉴스 4개까지 가져옴
         model.addAttribute("newNews", latestNews);
-        model.addAttribute("newPage", page);
-        model.addAttribute("hasNextNewPage", latestNews.hasNext());
 
         // 과학뉴스
-        Page<ScienceDTO> scienceNews = scienceonService.findScienceNews(scienceonPage, 4);
+        Page<ScienceDTO> scienceNews = scienceonService.findScienceNews(scienceonPage, 4);// 과학 뉴스 4개까지 가져옴
         model.addAttribute("scienceNews", scienceNews);
-        model.addAttribute("sciencePage", scienceonPage);
-        model.addAttribute("hasNextSciencePage", scienceNews.hasNext());
 
 
         // 새의 앨범
