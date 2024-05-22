@@ -16,6 +16,7 @@
 
 # 개요
 * 프로젝트 이름 : Birdy!
+* 프로젝트 목적 : 사용자가 저희 사이트를 통해 다양한 지식을 소통을 통해 공유하면서 탐조(새를 관찰)를 하기 위한 사이트
 * 프로젝트 개발 기간 : 2024.04 ~ 2024.05
 * 프로젝트 구성 인원 : 3명
 * 프로젝트 개발 환경
@@ -27,17 +28,11 @@
 
 # 프로젝트 구성
 * 메인 페이지
-  * 인트로 기능
-  * 새의 통계 및 그래프 시각화
-  * 새의 뉴스(일반, 과학)
-  * 게시판
-  * 새의 앨범
 * 새 앨범
 * 커뮤니티 게시판
 * 새 뉴스
 * 새의 탐조
 * 회원가입/로그인
-  * 소셜 로그인(카카오톡)
  <br>
  
 # 팀원 업무 분담 내역
@@ -92,4 +87,194 @@
       * 철새의 기본 정보 안내
       
 # Birdy 핵심 기능 설명
-저희 사이트 핵심 코드는 "**카카오 소셜로그인, 카카오API를 활용한 지도 구현, 커뮤니티 게시판, 새의 통계 그래프 시각화, 새의 앨범**"
+저희 사이트 핵심 코드는 "**카카오 소셜로그인, 카카오API를 활용한 지도 구현, 커뮤니티 게시판, 새의 통계 그래프 시각화, 새의 앨범**" <br>
+사용자가 저희 사이트를 통해 다양한 지식을 소통을 통해 공유하면서 탐조(새를 관찰)를 하기 위한 사이트
+
+## 카카오 소셜 로그인
+회원가입 양식을 제공하고 새 회원을 등록하고 저장, 이메일 인증처리와 로그인 양식 비밀번호 분실시 변경 양식 제공, 이메일 중복 체크.
+Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 카카오 로그인 링크와 함께 소셜 로그인 옵션 제공.
+코드 보기(html)
+```
+<!--로그인하기-->
+<div layout:fragment="content">
+    <form action="/members/login" role="form" method="post">
+
+        <div class="form-group">
+            <label th:for="memberEmail">Email</label>
+            <input type="email" class="form-control"
+                   name="memberEmail" placeholder="이메일을 입력해주세요">
+        </div>
+
+        <div class="form-group">
+            <label th:for="memberPwd">Password</label>
+            <input type="password" id="memberPwd" class="form-control"
+                   name="password" placeholder="비밀번호를 입력해주세요">
+        </div>
+
+        <!--카카오 로그인-->
+        <div class="input-group md-3">
+            <a href="/oauth2/authorization/kakao">kakao login</a>
+        </div>
+
+        <div>
+        <p th:if="${loginErrorMsg}"
+           th:text="${loginErrorMsg}" class="error">Error Message!</p>
+        <button class="btn btn-primary">로그인</button>
+        <button type="button" class="btn btn-primary"
+                onclick="location.href='/members/new'">회원가입</button>
+        </div>
+
+        <a href="/members/changePassword" rel="external">비밀번호 분실</a>
+
+<!--        <input type="hidden" th:name="${_csrf.parameterName}"-->
+<!--               th:value="${_csrf.token}">-->
+    </form>
+```
+코드보기(Controller)
+```
+package com.keduit.bird.controller;
+
+import com.keduit.bird.dto.MemberFormDTO;
+import com.keduit.bird.entity.Member;
+import com.keduit.bird.service.CertCodeService;
+import com.keduit.bird.service.EmailService;
+import com.keduit.bird.service.LoginService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/members")
+@RequiredArgsConstructor
+public class MemberController {
+
+    private final LoginService loginService;
+    private final EmailService emailService;
+
+    private final PasswordEncoder passwordEncoder;
+    private final CertCodeService certCodeService;
+
+    @GetMapping("/new")
+    public String memberForm(Model model){
+        model.addAttribute("memberFormDTO", new MemberFormDTO());
+        return "member/memberForm";
+    }
+
+    @PostMapping("/new")
+    public String newMember(@Valid MemberFormDTO memberFormDTO,
+                            BindingResult bindingResult, Model model, MultipartFile profileFile){
+        if(bindingResult.hasErrors()){
+            System.out.println("-----가입 중 오류 발생-----");
+            System.out.println("데이터 확인 : " + memberFormDTO);
+            return "member/memberForm";
+        }
+
+        try {
+            Member member = Member.createMember(memberFormDTO, passwordEncoder);
+            loginService.saveMember(member, profileFile);
+            System.out.println("저장 완료!");
+        }catch(IllegalStateException e){
+            model.addAttribute("errorMessage", "이미 가입된 회원입니다.");
+            return "member/memberForm";
+        }catch(Exception e){
+            model.addAttribute("errorMessage", e.getMessage());
+            System.out.println("회원 데이터 저장 중 오류 발생");
+            return "member/memberForm";
+        }
+        return "redirect:/"; // 로그인 성공 후 홈페이지로 리디렉션
+    }
+
+    //이메일 인증
+    @PostMapping("/cert")
+    public ResponseEntity<String> certCode(@RequestBody Map<String, String> requestData){
+        String memberEmail = requestData.get("memberEmail");
+        if(memberEmail !=null) {
+            String certCode = emailService.generateCode();
+            System.out.println("------이메일 전달 확인 : " + memberEmail);
+            System.out.println("------코드 확인 : " + certCode);
+            emailService.sendMail(memberEmail, certCode);
+            certCodeService.saveCertCode(memberEmail, certCode);
+            System.out.println(memberEmail + "###" + certCode);
+
+            return ResponseEntity.ok().build();
+        }else{
+            return ResponseEntity.badRequest().body("이메일 주소를 찾을 수 없습니다.");
+        }
+    }
+    @PostMapping("/verify")
+    public ResponseEntity<String> verifyCode(@RequestBody Map<String, String> requestData) {
+        String memberEmail = requestData.get("memberEmail");
+        System.out.println("--------" + memberEmail);
+        String certCode = requestData.get("certCode");
+        System.out.println("--------" + certCode);
+        try {
+            loginService.verifyEmail(memberEmail, certCode);
+            System.out.println("인증코드 비교 : " + memberEmail + "/" + certCode);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    //로그인
+    @GetMapping("/login")
+    public String loginForm(){
+        System.out.println("홈으로 이동");
+        return "member/memberLoginForm";
+    }
+
+    @GetMapping("/login/error")
+    public String loginError(Model model){
+        System.out.println("에러 컨트로러러======");
+        model.addAttribute("loginErrorMsg", "이메일, 혹은 비밀번호를 확인해주세요.");
+        return "/member/memberLoginForm";
+    }
+
+    // 비밀번호 분실시 재설정하기
+    @GetMapping("/changePassword")
+    public String changePass(Model model){
+        model.addAttribute("memberFormDTO", new MemberFormDTO());
+        return "member/changePassForm";
+    }
+    //회원 확인을 위한 이메일 존재 확인
+    @PostMapping("/checkEmail")
+    public ResponseEntity<Boolean> memberCheck(String memberEmail){
+        boolean exists = loginService.memberEmailCheck(memberEmail);
+        return ResponseEntity.ok(exists);
+    }
+
+    //해당 이메일 회원의 비밀번호 업데이트
+    @PostMapping("/changePassword")
+    public String pwdUpdate(@RequestParam String memberEmail,
+                            @RequestParam String memberPwd,
+                            Model model){
+        try{
+            String newPwd = Member.updatePwd(memberPwd, passwordEncoder);
+            loginService.updatePassword(newPwd, memberEmail);
+        }catch (Exception e){
+            model.addAttribute("errorMessage", "비밀번호 변경 중 오류발생!");
+            return "members/changePassForm";
+        }
+        System.out.println("성공!!");
+        return "redirect:/";
+    }
+
+    //어바웃 어스 페이지 이동
+    @GetMapping("/about")
+    public String aboutForm(){
+        return "member/about";
+    }
+
+
+}
+
+```
