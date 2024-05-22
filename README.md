@@ -93,7 +93,9 @@
 ## 카카오 소셜 로그인
 회원가입 양식을 제공하고 새 회원을 등록하고 저장, 이메일 인증처리와 로그인 양식 비밀번호 분실시 변경 양식 제공, 이메일 중복 체크.
 Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 카카오 로그인 링크와 함께 소셜 로그인 옵션 제공.
-코드 보기(html)
+<br>
+
+코드 보기(html) <br>
 ```html
 <!--로그인하기-->
 <div layout:fragment="content">
@@ -130,9 +132,9 @@ Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 
 <!--               th:value="${_csrf.token}">-->
     </form>
 ```
-![MemberController.java](C:\myBoot\Bird\src\main\java\com\keduit\bird\controller)
 
-코드보기(Controller)
+
+코드보기![MemberController.java](C:\myBoot\Bird\src\main\java\com\keduit\bird\controller)(Controller) <br>
 ```java
 package com.keduit.bird.controller;
 
