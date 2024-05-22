@@ -48,7 +48,7 @@
 전반적인 프로젝트의 구성 및 ERD 설계 등 초안을 통해 팀원과 회의를 하였고 시행 착오를 겪으면서 구성하였습니다 <br>
 <br>
 
-## ![image](https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/fdf8fb32-8c9f-4859-a343-429eef2b0dd2 width="40" height="40")김진수(팀장)
+## <img src="https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/fdf8fb32-8c9f-4859-a343-429eef2b0dd2" width="40" height="40"/>김진수(팀장)
 * 담당 역할
   * 전체 페이지 통합 및 구성
     * 카테고리별 메인 페이지 재가공
@@ -62,7 +62,8 @@
     * 새의 종류 별 개체 수
     * 멸종 위기 종(등급) 별 개체 수
     * 회원 관리(조회, 권한(회원 탈퇴 시 정지), 수정)
-## 이세진(팀원)
+
+## <img src="https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/acef5d1e-db23-4245-8ad3-89ce729a4057" width="40" height="40"/>이세진(팀원)
 * 담당 역할
   * 회원가입 및 로그인
     * 아이디, 이메일 중복 검사
@@ -82,7 +83,8 @@
     * **"ㄱ, ㄴ, ㄷ"** 모음에 따른 데이터 분류
     * 멸종 위기종 **1급, 2급** 별 분류
     * 새의 사진과 이름, 간략한 설명글 구성
-  ## 김태리(팀원)
+
+  ## <img src="https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/7418d06b-b9aa-41ce-8c4a-d551302da9b6" width="40" height="40"/>김태리(팀원)
   * 담당 역할
     * 커뮤니티 게시판
       * 게시글, 댓글 CRUD 구현
