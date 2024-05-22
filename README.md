@@ -130,6 +130,8 @@ Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 
 <!--               th:value="${_csrf.token}">-->
     </form>
 ```
+![MemberController.java](C:\myBoot\Bird\src\main\java\com\keduit\bird\controller)
+
 코드보기(Controller)
 ```java
 package com.keduit.bird.controller;
