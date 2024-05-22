@@ -1464,32 +1464,6 @@ public class BirdStatisticsService {
     <summary>코드 보기(Controller)</summary>
 
 ```java
-package com.keduit.bird.controller;
-
-import com.keduit.bird.constant.BirdGroup;
-import com.keduit.bird.entity.BirdList;
-import com.keduit.bird.entity.Birds;
-import com.keduit.bird.service.BirdListService;
-import com.keduit.bird.service.BirdService;
-import com.keduit.bird.service.BirdStatisticsService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Controller;
-
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 @Controller
 @RequestMapping("/bird")
 @RequiredArgsConstructor
