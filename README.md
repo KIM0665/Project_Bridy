@@ -142,25 +142,6 @@ Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 
     <summary>코드 보기(Controller)</summary>
 
 ```java
-package com.keduit.bird.controller;
-
-import com.keduit.bird.dto.MemberFormDTO;
-import com.keduit.bird.entity.Member;
-import com.keduit.bird.service.CertCodeService;
-import com.keduit.bird.service.EmailService;
-import com.keduit.bird.service.LoginService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/members")
@@ -296,26 +277,6 @@ public class MemberController {
 
 ```java
 
-package com.keduit.bird.service;
-
-import com.keduit.bird.dto.MemberFormDTO;
-import com.keduit.bird.entity.Member;
-import com.keduit.bird.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Optional;
-
-import static com.keduit.bird.constant.Role.STOP;
-
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -392,7 +353,9 @@ public class MemberService{
 
 <details>
     <summary><i>코드 보기(HTML)</i></summary>
+	
 ```html
+	
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="https://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -564,11 +527,14 @@ public class MemberService{
         return "bird/birdybird";
     }
 ```
+		
 </details>
 
 <details>
     <summary>코드 보기(Service)</summary>
+	
 ```java
+
 @Service
 @RequiredArgsConstructor
 public class BirdService {
