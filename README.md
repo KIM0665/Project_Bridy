@@ -87,10 +87,10 @@
       * 철새의 기본 정보 안내
       
 # Birdy 핵심 기능 설명
-저희 사이트 핵심 코드는 "**카카오 소셜로그인, 카카오API를 활용한 지도 구현, 커뮤니티 게시판, 새의 통계 그래프 시각화, 새의 앨범**" <br>
+저희 사이트 핵심 코드는 "**회원가입/로그인, 카카오API를 활용한 지도 구현, 커뮤니티 게시판, 새의 통계 그래프 시각화, 새의 앨범**" <br>
 사용자가 저희 사이트를 통해 다양한 지식을 소통을 통해 공유하면서 탐조(새를 관찰)를 하기 위한 사이트
 
-## 카카오 소셜 로그인
+## 회원가입/로그인
 회원가입 양식을 제공하고 새 회원을 등록하고 저장, 이메일 인증처리와 로그인 양식 비밀번호 분실시 변경 양식 제공, 이메일 중복 체크.
 Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 카카오 로그인 링크와 함께 소셜 로그인 옵션 제공.
 <br>
@@ -384,5 +384,201 @@ public class MemberService{
 }
 
 ```
+</details>
 
+## 카카오 API지도를 활용한 지도 구현
+카카오 API를 활용한 지도 위치 서비스 활용 전국 추천 철새 탐조대 구현,
+마커 라이브러리 활용 탐조대 마커 표기
+
+<details>
+    <summary><i>코드 보기(HTML)</i></summary>
+```html
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+    <title>탐조</title>
+    <th:block layout:fragment="css">
+    <style>
+        /* 기본 CSS 설정 */
+       body, h1, p {
+           margin: 0;
+           padding: 0;
+       }
+       .main-box {
+           border: 2px solid black;
+           padding: 20px;
+           margin: 20px;
+       }
+       .section-box {
+           border: 1px solid grey;
+           margin: 10px;
+           padding: 10px;
+           background-color: #f9f9f9;
+       }
+
+       /* 헤더 스타일 */
+        header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+        }
+         /* 버튼 스타일 */
+        .bird-button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .footer{
+            margin-top: 50px;
+        }
+         .map-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* 전체 뷰포트 높이를 사용 */
+    }
+
+    </style>
+    </th:block>
+
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            window.onload = function(){
+
+            var container = document.getElementById('map');
+            var options = {
+                center: new kakao.maps.LatLng(36.687009,128.046518),
+                level: 13
+            };
+            var map = new kakao.maps.Map(container, options);
+		// </맵 생성>
+
+            var positions = [
+                {
+                    title: '장항습지탐조대',
+                    latlng: new kakao.maps.LatLng(37.641278, 126.758219)
+                },
+                {
+                    title: '갯골생태공원탐조대',
+                    latlng: new kakao.maps.LatLng(37.392934, 126.776943)
+                },
+                {
+                    title: '명지철새탐조대',
+                    latlng: new kakao.maps.LatLng(35.083967, 126.911815)
+                },
+                {
+                    title: '주남저수지탐조대',
+                    latlng: new kakao.maps.LatLng(35.310929, 128.680185)
+                },
+                {
+                    title: '간월호철새탐조대',
+                    latlng: new kakao.maps.LatLng(36.601085,126.440018)
+                },
+                {
+                    title: '하도철새탐조대',
+                    latlng: new kakao.maps.LatLng(33.512076,126.896637)
+                },
+                {
+                    title: '탑립돌보탐조대',
+                    latlng: new kakao.maps.LatLng(36.394635, 127.409965)
+                }
+
+            ];
+
+            for (var i = 0; i < positions.length; i ++) {
+
+                var marker = new kakao.maps.Marker({  // 마커 생성
+                    map: map, // 마커를 표시할 지도
+                    position: positions[i].latlng, // 마커를 표시할 위치
+                    title : positions[i].title, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시 됨
+                });
+            }
+            }
+        </script>
+    </th:block>
+    <div layout:fragment="content">
+        <header>
+            <h4> 철새와 탐조  </h4>
+        </header>
+
+        <div class="container">
+        <div class="main-box">
+            <div class="section-box">
+                <h1>철새란 무엇인가요?</h1>
+                <p>4계절이 있는 우리나라에서는 계절에 따라 다양한 새가 관찰됩니다. 겨울에 따라 이동을 하지 않는 새를 도시새라 하고, 계절에 따라 번식지와 월동지를 이동하는 새를 철새라고 합니다. 철새에는 여름철새, 겨울철새, 동반철새가 있으며, 이외에 길을 잃은 새가 조금합니다.</p>
+            </div>
+            <div class="section-box">
+                <h2>철새와 도시새는 어떻게 구분되나요?</h2>
+                <p>철새와 도시새는 번식지와 월동지로 다 그종 이나는 부분에서 차이가 나고 도시화하는 과정에서 발생한 다양한 생활환경에 따라 적응력에 차이가 따라 분류됩니다.</p>
+                <p>철새는 사질의 기호와 매이 높고 도시화로부터 상대적으로 먼 지역에서 번식하고, 일부는 양질의 먹이를 찾아 먼 거리를 이동합니다. 반면, 도시새는 인간 주변에서 활동하는 대표적인 새로서 일부는 철새로 변할 수 있습니다.</p>
+            </div>
+            <div class="section-box">
+                <h2>흔히 관찰되는 철새는 무엇인가요?</h2>
+                <p>흔히 관찰되는 철새로는 많은 수가 겨울을 채우고 봄에 되면 북상하는 대표적인 겨울철새입니다, 일부는 양질 먹이를 찾아서 거리를 이동합니다. 철새의 양상이나 부류가 다양한 세상에서의 종에서 유형에 따라 분류됩니다.</p>
+            </div>
+        <h2>전국 추천 탐조대</h2>
+        </div>
+        <div id="map" style="width: 600px; height: 450px; margin: 0 0 0 20px;"></div>
+        <!-- 컨테이너를 추가하여 지도와 목록을 나란히 배치 -->
+        <div style="width: 100%; overflow: hidden;">
+            <!-- 목록 박스 -->
+            <div style="float: right; margin-left: 20px; padding: 20px;
+            border: 1px solid #ccc; width: 635px; height: 450px; position: absolute;
+            top: 43.8%;
+            left: 800px;">
+                <h3>탐조대 목록</h3>
+                <ol>
+                    <li>장항습지탐조대</li><br>
+                    <li>갯골생태공원탐조대</li><br>
+                    <li>명지철새탐조대</li><br>
+                    <li>주남저수지탐조대</li><br>
+                    <li>간월호철새탐조대</li><br>
+                    <li>하도철새탐조대</li><br>
+                    <li>탑립돌보탐조대</li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+
+</html>
+
+```
+</details>
+
+<details>
+    <summary>코드 보기(Controller)</summary>
+```java
+@GetMapping("/birdy")
+    // 새의 탐조
+    public String showBirds(@RequestParam(required = false) String type, Model model) {
+        List<Birds> birds = birdService.showBirds(type);
+        model.addAttribute("birds", birds);
+        return "bird/birdybird";
+    }
+```
+</details>
+
+<details>
+    <summary>코드 보기(Service)</summary>
+```java
+@Service
+@RequiredArgsConstructor
+public class BirdService {
+
+    private final BirdsRepository birdsRepository;
+
+    public List<Birds> showBirds(String type) {
+        List<Birds> birds = type == null ? birdsRepository.findAll() : birdsRepository.findByType(type);
+        return birds;
+    }
+}
+```
 </details>
