@@ -134,7 +134,7 @@ Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 
 ```
 
 
-코드보기![MemberController.java](C:\myBoot\Bird\src\main\java\com\keduit\bird\controller)(Controller) <br>
+코드보기[MemberController.java](C:\myBoot\Bird\src\main\java\com\keduit\bird\controller)(Controller) <br>
 ```java
 package com.keduit.bird.controller;
 
