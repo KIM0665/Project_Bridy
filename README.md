@@ -48,7 +48,7 @@
 전반적인 프로젝트의 구성 및 ERD 설계 등 초안을 통해 팀원과 회의를 하였고 시행 착오를 겪으면서 구성하였습니다 <br>
 <br>
 
-## ![image](https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/fdf8fb32-8c9f-4859-a343-429eef2b0dd2)김진수(팀장)
+## ![image](https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/fdf8fb32-8c9f-4859-a343-429eef2b0dd2 width="40" height="40")김진수(팀장)
 * 담당 역할
   * 전체 페이지 통합 및 구성
     * 카테고리별 메인 페이지 재가공
