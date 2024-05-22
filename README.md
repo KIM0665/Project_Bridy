@@ -94,7 +94,7 @@
 회원가입 양식을 제공하고 새 회원을 등록하고 저장, 이메일 인증처리와 로그인 양식 비밀번호 분실시 변경 양식 제공, 이메일 중복 체크.
 Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 카카오 로그인 링크와 함께 소셜 로그인 옵션 제공.
 코드 보기(html)
-```
+```html
 <!--로그인하기-->
 <div layout:fragment="content">
     <form action="/members/login" role="form" method="post">
@@ -131,7 +131,7 @@ Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 
     </form>
 ```
 코드보기(Controller)
-```
+```java
 package com.keduit.bird.controller;
 
 import com.keduit.bird.dto.MemberFormDTO;
