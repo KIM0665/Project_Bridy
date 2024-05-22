@@ -19,7 +19,7 @@
 - 프로젝트 개발 기간 : 2024.04 ~ 2024.05
 - 프로젝트 구성 인원 : 3명
 * 프로젝트 개발 환경
- * 언어 : Java 11, HTML/CSS, JavaScript, Python
- * 프레임워크 : Spring Framework, JPA, Spring Security
- * DB : MySQL
- * API 라이브러리 : Jquery, Chart, Gsap, Bootstrap
+* * 언어 : Java 11, HTML/CSS, JavaScript, Python
+* * 프레임워크 : Spring Framework, JPA, Spring Security
+* * DB : MySQL
+  * API 라이브러리 : Jquery, Chart, Gsap, Bootstrap
