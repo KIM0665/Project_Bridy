@@ -1818,7 +1818,7 @@ public class BirdListService {
 팀프로젝트를 하면서 팀원들의 느낀 부분입니다
 
 ## 시연 연상
-유튜브 : [유튜브](https://youtu.be/Hf6y94OGwWw)
+[유튜브](https://www.flaticon.com/kr/free-icon/youtube_2875432) : [시연연상](https://youtu.be/Hf6y94OGwWw)
 
 
 ## 김진수(팀장)
