@@ -13,11 +13,11 @@
 <br>
 <br>
 # 개요 <br>
-- 프로젝트 이름 : Birdy! <br>
-- 프로젝트 개발 기간 : 2024.04 ~ 2024.05 <br>
-- 프로젝트 구성 인원 : 3명 <br>
-- 프로젝트 개발 환경 <br>
---언어 : Java 11, HTML/CSS, JavaScript, Python <br>
---프레임워크 : Spring Framework, JPA, Spring Security <br>
---DB : MySQL <br>
---API 라이브러리 : Jquery, Chart, Gsap, Bootstrap <br>
+- 프로젝트 이름 : Birdy!
+- 프로젝트 개발 기간 : 2024.04 ~ 2024.05
+- 프로젝트 구성 인원 : 3명
+- 프로젝트 개발 환경
+--언어 : Java 11, HTML/CSS, JavaScript, Python
+--프레임워크 : Spring Framework, JPA, Spring Security
+--DB : MySQL
+--API 라이브러리 : Jquery, Chart, Gsap, Bootstrap
