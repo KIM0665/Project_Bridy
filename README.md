@@ -554,10 +554,68 @@ public class BirdService {
 게시판 CRUD구현과, 조회수 처리 Thymeleaf 템플릿 엔진을 사용하여 페이징 처리된 게시글 목록을 표시.
 
 <details>
-    <summary>코드 보기(HTML)</summary>
+    <summary>코드 보기(HTML) List</summary>
 
 ```html
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+
+    <title>Title</title>
+
+    <div layout:fragment="content">
+        <button onclick="saveReq()">글작성</button>
+
+        <table>
+            <tr>
+                <th>id</th>
+                <th>title</th>
+                <th>writer</th>
+                <th>date</th>
+                <th>hits</th>
+            </tr>
+            <tr th:each="board: ${boardList}">
+                <td th:text="${board.id}"></td>
+                <td><a th:href="@{|/board/${board.id}|(page=${boardList.number + 1})}" th:text="${board.boardTitle}"></a></td>
+                <td th:text="${board.adminBoardId}"></td>
+                <td th:text="*{#temporals.format(board.BoardCreatedTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td th:text="${board.boardHits}"></td>
+            </tr>
+        </table>
+        <!-- 첫번째 페이지로 이동 -->
+        <!-- /board/paging?page=1 -->
+        <a th:href="@{/board/paging(page=1)}">First</a>
+        <!-- 이전 링크 활성화 비활성화 -->
+        <!-- boardList.getNumber() 사용자:2페이지 getNumber()=1 -->
+        <a th:href="${boardList.first} ? '#' : @{/board/paging(page=${boardList.number})}">prev</a>
+
+        <!-- 페이지 번호 링크(현재 페이지는 숫자만)
+                for(int page=startPage; page<=endPage; page++)-->
+        <span th:each="page: ${#numbers.sequence(startPage, endPage)}">
+        <!-- 현재페이지는 링크 없이 숫자만 -->
+            <span th:if="${page == boardList.number + 1}" th:text="${page}"></span>
+            <!-- 현재페이지 번호가 아닌 다른 페이지번호에는 링크를 보여줌 -->
+            <span th:unless="${page == boardList.number + 1}">
+                <a th:href="@{/board/paging(page=${page})}" th:text="${page}"></a>
+            </span>
+        </span>
+
+        <!-- 다음 링크 활성화 비활성화
+            사용자: 2페이지, getNumber: 1, 3페이지-->
+        <a th:href="${boardList.last} ? '#' : @{/board/paging(page=${boardList.number + 2})}">next</a>
+        <!-- 마지막 페이지로 이동 -->
+        <a th:href="@{/board/paging(page=${boardList.totalPages})}">Last</a>
+
+        <script>
+            const saveReq = () => {
+                location.href = "/board/save";
+            }
+
+        </script>
+    </div>
+</html>
 ```
 </details>
 
@@ -796,7 +854,175 @@ public class BoardService {
     <summary>코드 보기(HTMl)</summary>
 
 ```html
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+
+    <title>News Page</title>
+    <th:block layout:fragment="css">
+    <style>
+        .news-box {
+            float: left; /* 왼쪽 또는 오른쪽 정렬을 위해 float 사용 */
+            width: 50%; /* 화면의 절반 크기 */
+            padding: 10px;
+            box-sizing: border-box;
+
+        }
+        .full-width {
+            width: 100%; /* 전체 폭 사용 */
+            clear: both; /* 이전 float 제거 */
+        }
+        .left {
+            float: left; /* 왼쪽 정렬 */
+        }
+        .right {
+            float: right; /* 오른쪽 정렬 */
+        }
+        .content{
+            height: 1500px;
+        }
+        .past_page, .science_news{
+            width: 500px;
+            margin-left: 20px;
+
+        }
+        .news_page{
+            width: 500px;
+            margin-left: 270px;
+        }
+        .science, .news, .past{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .new-news, .past-news, .science-news{
+            text-align: center;
+        }
+        .science p, .news p, .past p,
+        .science h3, .news h3, .past h3{
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+    <div class="container">
+        <div class="news-box right new-news full-width">
+            <h2>New News</h2>
+            <ul class="news_page">
+                <li th:each="news : ${newNews}" class="news">
+                    <a th:text="${news.birdysNewsTitle}" th:href="${news.birdysNewsSource}" style="text-decoration: none; font-size: 20px;"></a>
+                    <p th:text="${news.birdysNewsContent}"></p>
+                </li>
+            </ul>
+            <!-- New News 페이지 번호 표시 -->
+            <div th:if="${newNews.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- 처음으로 버튼 -->
+                    <li th:class="${newNews.first ? 'disabled' : ''}" th:unless="${newNews.first}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=0'}">처음으로</a>
+                    </li>
+                    <!-- 이전 버튼 -->
+                    <li th:class="${newNews.hasPrevious() ? '' : 'disabled'}" th:unless="${newNews.first}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + ${newNews.number - 1}}">이전</a>
+                    </li>
+                    <!-- 페이지 번호 -->
+                    <li th:each="i : ${#numbers.sequence(0, newNews.totalPages - 1)}" th:class="${newNews.number == i ? 'active' : ''}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + ${i}}">[[${i + 1}]]</a>
+                    </li>
+                    <!-- 다음 버튼 -->
+                    <li th:class ="${newNews.hasNext() ? '' : 'disabled'}">
+                        <a class="btn btn-primary btn-sm" th:if="${newNews.hasNext()}" th:href="@{'/news?page=' + ${newNews.number + 1}}">다음</a>
+                    </li>
+                    <!-- 끝 버튼 -->
+                    <li th:class="${newNews.last ? 'disabled' : ''}" th:unless="${newNews.last}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + (${newNews.totalPages} - 1)}">끝</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="news-box left past-news">
+            <h2>Past News</h2>
+            <ul class="past_page">
+                <li th:each="news : ${pastNews}" class="past">
+                    <a th:text="${news.birdysNewsTitle}" th:href="${news.birdysNewsSource}" style="text-decoration: none; font-size: 20px;"></a>
+                    <p th:text="${news.birdysNewsContent}"></p>
+                    <p th:text="${news.birdysNewsSource}"></p>
+                </li>
+            </ul>
+            <!-- Past News 페이지 번호 표시 -->
+            <div th:if="${pastNews.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- 처음으로 버튼 -->
+                    <li th:class="${pastNews.first ? 'disabled' : ''}" th:unless="${pastNews.first}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=0'}">처음으로</a>
+                    </li>
+                    <!-- 이전 버튼 -->
+                    <li th:class="${pastNews.hasPrevious() ? '' : 'disabled'}" th:unless="${pastNews.first}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + ${pastNews.number - 1}}">이전</a>
+                    </li>
+                    <!-- 페이지 번호 -->
+                    <li th:each="i : ${#numbers.sequence(0, pastNews.totalPages - 1)}" th:class="${pastNews.number == i ? 'active' : ''}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + ${i}}">[[${i + 1}]]</a>
+                    </li>
+                    <!-- 다음 버튼 -->
+                    <li th:class ="${pastNews.hasNext() ? '' : 'disabled'}">
+                        <a class="btn btn-primary btn-sm" th:if="${pastNews.hasNext()}" th:href="@{'/news?page=' + ${pastNews.number + 1}}">다음</a>
+                    </li>
+                    <!-- 끝 버튼 -->
+                    <li th:class="${pastNews.last ? 'disabled' : ''}" th:unless="${pastNews.last}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + (${pastNews.totalPages} - 1)}">끝</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="news-box right science-news">
+            <h2>Science News</h2>
+            <ul class="science_news">
+                <li th:each="science : ${scienceNews}" class="science">
+                    <a th:text="${science.birdysScienceonTitle}" th:href="${science.birdysScienceonSource}" style="text-decoration: none; font-size: 20px;"></a>
+                    <p th:text="${science.birdysScienceonContent}"></p>
+                    <p th:text="${science.birdysScienceonSource}"></p>
+                </li>
+            </ul>
+            <!-- science News 페이지 번호 표시 -->
+            <div th:if="${scienceNews.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- 처음으로 버튼 -->
+                    <li th:class="${scienceNews.first ? 'disabled' : ''}" th:unless="${scienceNews.first}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=0'}">처음으로</a>
+                    </li>
+                    <!-- 이전 버튼 -->
+                    <li th:class="${scienceNews.hasPrevious() ? '' : 'disabled'}" th:unless="${scienceNews.first}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + ${scienceNews.number - 1}}">이전</a>
+                    </li>
+                    <!-- 페이지 번호 -->
+                    <li th:each="i : ${#numbers.sequence(0, scienceNews.totalPages - 1)}" th:class="${scienceNews.number == i ? 'active' : ''}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + ${i}}">[[${i + 1}]]</a>
+                    </li>
+                    <!-- 다음 버튼 -->
+                    <li th:class ="${scienceNews.hasNext() ? '' : 'disabled'}">
+                        <a class="btn btn-primary btn-sm" th:if="${scienceNews.hasNext()}" th:href="@{'/news?page=' + ${scienceNews.number + 1}}">다음</a>
+                    </li>
+                    <!-- 끝 버튼 -->
+                    <li th:class="${scienceNews.last ? 'disabled' : ''}" th:unless="${scienceNews.last}">
+                        <a class="btn btn-primary btn-sm" th:href="@{'/members/news?page=' + (${scienceNews.totalPages} - 1)}">끝</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+
+</html>
+
+
 ```
 </details>
 
