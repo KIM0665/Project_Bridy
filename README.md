@@ -890,20 +890,10 @@ public class NewsService {
     <summary>코드 보기(HTMl)</summary>
 
 ```html
-<!-- /*
-* Bootstrap 5 / main.html
-* Template Name: Furni
-* Template Author: Untree.co
-* Template URI: https://untree.co/
-* License: https://creativecommons.org/licenses/by/3.0/
-*/ -->
 <!doctype html>
 <html lang="ko" xmlns:th="https://thymeleaf.org"
 	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate='~{layouts/layout1}'>
-
-
-
 <th:block layout:fragment="script">
 
 	<script th:inline="javascript">
@@ -919,10 +909,6 @@ public class NewsService {
     const birdData = /*[[${birdData}]]*/ [];
 
 	 /*]]>*/
-
-
-
-
 
     let birdChart = new Chart(document.getElementById("bird-chat"), {
         type: 'bar',
@@ -1018,9 +1004,6 @@ public class NewsService {
 	</style>
 </th:block>
 <div layout:fragment="content">
-
-
-
 	<!-- Start Hero Section -->
 	<div class="hero">
 		<div class="container">
@@ -1045,7 +1028,6 @@ public class NewsService {
 	<div class="product-section">
 		<div class="container">
 			<div class="row">
-
 				<!-- Start Column 1 -->
 				<div>
 					<h2 class="mb-4 section-title center">새의 통계</h2>
@@ -1428,7 +1410,53 @@ public class BirdStatisticsService {
     <summary>코드 보기(HTMl)</summary>
 
 ```html
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate='~{layouts/layout1}'>
+
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<head>
+    <title>새의 종류</title>
+</head>
+
+<!-- body -->
+<div layout:fragment="content">
+
+    <div>
+        <form th:action="@{/bird/birds}" method="get">
+            <button type="submit" name="groupValue" value="GA">ㄱ</button>
+            <button type="submit" name="groupValue" value="NA">ㄴ</button>
+            <button type="submit" name="groupValue" value="DA">ㄷ</button>
+            <button type="submit" name="groupValue" value="MA">ㄹ</button>
+            <button type="submit" name="groupValue" value="BA">ㅂ</button>
+            <button type="submit" name="groupValue" value="SA">ㅅ</button>
+            <button type="submit" name="groupValue" value="AA">ㅇ</button>
+            <button type="submit" name="groupValue" value="JA">ㅈ</button>
+            <button type="submit" name="groupValue" value="CHA">ㅊ</button>
+            <button type="submit" name="groupValue" value="KA">ㅋ</button>
+            <button type="submit" name="groupValue" value="TA">ㅌ</button>
+            <button type="submit" name="groupValue" value="PA">ㅍ</button>
+            <button type="submit" name="groupValue" value="HA">ㅎ</button>
+            <button type="submit" name="groupValue" value="I">I급</button>
+            <button type="submit" name="groupValue" value="II">II급</button>
+        </form>
+    </div>
+
+    <h1 th:text="${birdList != null and not #lists.isEmpty(birdList) ? birdList[0].birdGroup : 'Unknown'}">Bird Group</h1>
+
+    <div class="wrap">
+        <div th:each="bird : ${birdList}" th:id="${bird.id}" class="container">
+            <img class="pic_bird" th:src="${bird.birdImgUrl}" th:alt="${bird.birdName}">
+            <h3 th:text="${bird.birdName}">${bird.birdName}</h3>
+            <p th:text="${bird.birdDetail}"></p>
+        </div>
+    </div>
+
+</div>
+
+</html>
+
 ```
 </details>
 
@@ -1436,7 +1464,103 @@ public class BirdStatisticsService {
     <summary>코드 보기(Controller)</summary>
 
 ```java
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+package com.keduit.bird.controller;
+
+import com.keduit.bird.constant.BirdGroup;
+import com.keduit.bird.entity.BirdList;
+import com.keduit.bird.entity.Birds;
+import com.keduit.bird.service.BirdListService;
+import com.keduit.bird.service.BirdService;
+import com.keduit.bird.service.BirdStatisticsService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@Controller
+@RequestMapping("/bird")
+@RequiredArgsConstructor
+public class BirdListController {
+
+    @Autowired
+    private BirdListService birdListService;
+    private final BirdService birdService;
+    private final BirdStatisticsService birdStatisticsService;
+
+    @GetMapping("/birds")
+    public String getBird(Model model, @RequestParam(required = false) String groupValue) {
+
+        // 기본 group 값을 ga로 설정.
+        BirdGroup group = BirdGroup.GA;
+
+        // 하나의 페이지를 사용해 여러 리스트를 보여주기 위해서 switch문을 사용해 리스트를 구분할 group값 변경하기.
+        // (= 버튼에 value = "group" 값 지정.)
+        if(groupValue != null){
+            switch(groupValue){
+                case "NA" : group = BirdGroup.NA;
+                    break;
+                case "DA" : group = BirdGroup.DA;
+                    break;
+                case "MA" : group = BirdGroup.MA;
+                    break;
+                case "BA" : group = BirdGroup.BA;
+                    break;
+                case "SA" : group = BirdGroup.SA;
+                    break;
+                case "AA" : group = BirdGroup.AA;
+                    break;
+                case "JA" : group = BirdGroup.JA;
+                    break;
+                case "CHA" : group = BirdGroup.CHA;
+                    break;
+                case "KA" : group = BirdGroup.KA;
+                    break;
+                case "TA" : group = BirdGroup.TA;
+                    break;
+                case "PA" : group = BirdGroup.PA;
+                    break;
+                case "HA" : group = BirdGroup.HA;
+                    break;
+                    //멸종위기종
+                case "I" : group = BirdGroup.I;
+                    break;
+                case "II" : group = BirdGroup.II;
+                    break;
+                    //따로 지정 값이 없다면(큰 카테고리명을 클릭했을 경우) 기본 ga 값으로 지정되어 'ㄱ'리스트 보여짐.
+                default: group = BirdGroup.GA;
+                    break;
+            }
+        }
+
+        List<BirdList> birdList = birdListService.getBirdListByBirdGroup2(group);
+        model.addAttribute("birdList", birdList);
+        return "bird/birdListForm";
+        //사용자가 선택한 group 값을 가지고 해당 페이지로 이동
+    }
+
+    @GetMapping("/birdy")
+    // 새의 탐조
+    public String showBirds(@RequestParam(required = false) String type, Model model) {
+        List<Birds> birds = birdService.showBirds(type);
+        model.addAttribute("birds", birds);
+        return "bird/birdybird";
+    }
+
+}
+
 ```
 </details>
 
@@ -1444,6 +1568,47 @@ public class BirdStatisticsService {
     <summary>코드 보기(Service)</summary>
 
 ```java
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+@Service
+public class BirdListService {
+
+    @Autowired
+    private BirdRepository birdRepository;
+
+    public List<BirdList> getBirdListByBirdGroup2(BirdGroup group) {
+        return birdRepository.findByBirdGroup(group);
+    }
+
+    public Page<BirdListFormDTO> getBirdListByBirdGroup(BirdGroup group, int page, int size) {
+
+
+        return birdRepository.findByBirdGroup(group,PageRequest.of(page,size)).map(this::birdListFormDTO);
+    }
+
+    public BirdListFormDTO birdListFormDTO(BirdList birdList){
+
+        BirdListFormDTO birdListFormDTO = new BirdListFormDTO();
+
+        birdListFormDTO.setId(birdList.getId());
+        birdListFormDTO.setBirdName(birdList.getBirdName());
+        birdListFormDTO.setBirdDetail(birdList.getBirdDetail());
+        birdListFormDTO.setBirdImgUrl(birdList.getBirdImgUrl());
+        birdListFormDTO.setGroup(birdList.getBirdGroup());
+        return birdListFormDTO;
+    }
+
+
+    //크롤링으로 데이터 긁어오기
+    private static final int PTAGE_LIMIT = 3;
+
+    @Autowired
+    public void BirdListService(BirdRepository birdRepository) {
+        this.birdRepository = birdRepository;
+    }
+
+    @PostConstruct
+    @Transactional
+    public void SaveBird() {
+    }
+}
 ```
 </details>
