@@ -95,7 +95,9 @@
 Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 카카오 로그인 링크와 함께 소셜 로그인 옵션 제공.
 <br>
 
-코드 보기(html) <br>
+<details>
+    <summary>코드 보기(html)</summary>
+
 ```html
 <!--로그인하기-->
 <div layout:fragment="content">
@@ -132,6 +134,8 @@ Thymeleaf 템플릿 엔진을 사용하여 로그인 페이지를 생성하고, 
 <!--               th:value="${_csrf.token}">-->
     </form>
 ```
+
+</details>
 
 
 코드보기[MemberController.java](C:\myBoot\Bird\src\main\java\com\keduit\bird\controller)(Controller) <br>
