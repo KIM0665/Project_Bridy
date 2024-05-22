@@ -87,7 +87,7 @@
       * 철새의 기본 정보 안내
       
 # Birdy 핵심 기능 설명
-저희 사이트 핵심 코드는 "**회원가입/로그인, 카카오API를 활용한 지도 구현, 커뮤니티 게시판, 새의 통계 그래프 시각화, 새의 앨범**" <br>
+저희 사이트 핵심 코드는 "**회원가입/로그인, 카카오API를 활용한 지도 구현, 커뮤니티 게시판, 새의 뉴스, 새의 통계 그래프 시각화, 새의 앨범**" <br>
 사용자가 저희 사이트를 통해 다양한 지식을 소통을 통해 공유하면서 탐조(새를 관찰)를 하기 위한 사이트
 
 ## 회원가입/로그인
@@ -548,5 +548,902 @@ public class BirdService {
         return birds;
     }
 }
+```
+</details>
+
+## 커뮤니티 게시판
+게시판 CRUD구현과, 조회수 처리 Thymeleaf 템플릿 엔진을 사용하여 페이징 처리된 게시글 목록을 표시.
+
+<details>
+    <summary>코드 보기(HTML)</summary>
+
+```html
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+```
+</details>
+
+<details>
+    <summary>코드 보기(Controller)</summary>
+
+```java
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/board")
+public class BoardController {
+    private final BoardService boardService;
+    private final CommentService commentService;
+    private final MemberService memberService;
+
+    @GetMapping("/save")
+    public String saveForm(Principal principal, Model model){
+        String memberEmail = principal.getName();
+        String adminBoardId = memberService.findMemberNameByMemberEmail(memberEmail);
+        model.addAttribute("adminBoardId", adminBoardId);
+        return "save";
+    }
+
+    //작성자를 해당 유저의 이름으로 자동적용시키기위해 코드 추가함.
+    @PostMapping("/save")
+    public String save(@ModelAttribute BoardDTO boardDTO, Principal principal) throws IOException {
+        System.out.println("boardDTO = " + boardDTO);
+        boardDTO.setAdminBoardId(memberService.findMemberNameByMemberEmail(principal.getName()));
+        boardService.save(boardDTO);
+        return "redirect:/board/paging";
+    }
+
+    @GetMapping("/list")
+    public String findAll(Model model){
+        List<BoardDTO> boardDTOList = boardService.findAll();
+        model.addAttribute("boardList",boardDTOList);
+        return "paging";
+    }
+    @GetMapping("/{id}")
+    public String findById(@PathVariable Long id, Model model,
+                           @PageableDefault(page=1) Pageable pageable){
+        //해당 게시글의 조회수를 하나 올리고 게시글 데이터를 가져와서 출력
+        boardService.updateHits(id);
+        BoardDTO boardDTO = boardService.findById(id);
+        //댓글목록 가져오기//
+        List<CommentDTO> commentDTOList = commentService.findAll(id);
+        model.addAttribute("commentList",commentDTOList);
+
+        model.addAttribute("board", boardDTO);
+        model.addAttribute("page", pageable.getPageNumber());
+        return "detail";
+    }
+
+    @GetMapping("/update/{id}")
+    public String updateForm(@PathVariable Long id, Model model){
+        BoardDTO boardDTO = boardService.findById(id);
+        model.addAttribute("boardUpdate", boardDTO);
+        return "update";
+    }
+
+    @PostMapping("/update")
+    public String update(@ModelAttribute BoardDTO boardDTO, Model model) {
+        BoardDTO board = boardService.update(boardDTO);
+        model.addAttribute("board", board);
+        return "detail";
+//        return "redirect:/board/" + boardDTO.getId(); 조회수 오류때문에
+    }
+
+    //삭제
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Long id){
+        boardService.delete(id);
+        return "redirect:/board/paging";
+    }
+    //페이지처리
+    @GetMapping("/paging")
+    public String paging(@PageableDefault(page = 1)Pageable pageable, Model model){
+        //   pageable.getPageNumber();
+        Page<BoardDTO> boardList = boardService.paging(pageable);
+        int blockLimit = 3;
+        int startPage = (((int)(Math.ceil((double)pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1; // 1 4 7 10 ~~
+        int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
+
+        // page 갯수 20개
+        // 현재 사용자가 3페이지
+        // 1 2 3
+        // 현재 사용자가 7페이지
+        // 7 8 9
+        // 보여지는 페이지 갯수 3개
+        // 총 페이지 갯수 8개
+
+        model.addAttribute("boardList", boardList);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        return "paging";
+    }
+
+
+}
+
+```
+</details>
+
+<details>
+    <summary>코드 보기(Service)</summary>
+
+```java
+@Service
+@RequiredArgsConstructor
+public class BoardService {
+    private final BoardRepository boardRepository;
+    private final BoardFileRepository boardFileRepository;
+    private final MemberService memberService;
+
+    public void save(BoardDTO boardDTO) throws IOException {
+        //파일 첨부 여부에 따라서 로직을 분리
+        if (boardDTO.getBoardFile().isEmpty()) {
+            //첨부 파일 없음.
+            String memberName = getMemberNameFromAuthentication();
+            BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO, memberName);
+            boardRepository.save(boardEntity);
+        } else {
+            //첨부파일 있음.
+            // 첨부 파일 있음.
+            /*
+                1. DTO에 담긴 파일을 꺼냄
+                2. 파일의 이름 가져옴
+                3. 서버 저장용 이름을 만듦
+                // 내사진.jpg => 839798375892_내사진.jpg
+                4. 저장 경로 설정
+                5. 해당 경로에 파일 저장
+                6. board_table에 해당 데이터 save 처리
+                7. board_file_table에 해당 데이터 save 처리
+             */
+            String memberName = getMemberNameFromAuthentication();
+            BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardDTO, memberName);
+            Long savedId = boardRepository.save(boardEntity).getId();
+            BoardEntity board = boardRepository.findById(savedId).get();
+            for (MultipartFile boardFile : boardDTO.getBoardFile()) {
+//                MultipartFile boardFile = boardDTO.getBoardFile(); // 1.다중파일일경우 필요없는 부분
+                String originalFilename = boardFile.getOriginalFilename(); // 2.
+                String storedFileName = originalFilename; // 3.
+                String savePath = "C:/pj/members/" + storedFileName; // 4. 윈도우경로는 C:/springboot_img/ 그리고 9802398403948_내사진.jpg
+                boardFile.transferTo(new File(savePath)); // 5.
+
+                BoardFileEntity boardFileEntity = BoardFileEntity.toBoardFileEntity(board, originalFilename, storedFileName);
+                boardFileRepository.save(boardFileEntity);
+            }
+        }
+    }
+
+    @Transactional
+    public List<BoardDTO> findAll() {
+        List<BoardEntity> boardEntityList = boardRepository.findAll();
+        List<BoardDTO> boardDTOList = new ArrayList<>();
+        for (BoardEntity boardEntity : boardEntityList) {
+            boardDTOList.add(BoardDTO.toBoardDTO(boardEntity));
+        }
+        return boardDTOList;
+    }
+
+    @Transactional
+    public void updateHits(Long id) {
+        boardRepository.updateHits(id);
+    }
+
+    @Transactional
+    public BoardDTO findById(Long id) {
+        Optional<BoardEntity> optionalBoardEntity = boardRepository.findById(id);
+        if (optionalBoardEntity.isPresent()) {
+            BoardEntity boardEntity = optionalBoardEntity.get();
+            BoardDTO boardDTO = BoardDTO.toBoardDTO(boardEntity);
+            return boardDTO;
+        } else {
+            return null;
+        }
+    }
+
+    public BoardDTO update(BoardDTO boardDTO) {
+        String memberName = getMemberNameFromAuthentication();
+        BoardEntity boardEntity = BoardEntity.toUpdateEntity(boardDTO, memberName);
+        boardRepository.save(boardEntity);
+
+        return findById(boardDTO.getId());
+    }
+
+    public void delete(Long id) {
+        boardRepository.deleteById(id);
+    }
+
+    public Page<BoardDTO> paging(Pageable pageable) {
+        int page = pageable.getPageNumber() - 1; //page 위치에 있는 값은 0부터 시작
+        int pageLimit = 3; //한페이지에 보여줄 글 개수
+        Page<BoardEntity> boardEntities =
+                boardRepository.findAll(PageRequest.of(page, pageLimit, Sort.by(Sort.Direction.DESC, "id")));
+
+        System.out.println("boardEntities.getContent() = " + boardEntities.getContent()); // 요청 페이지에 해당하는 글
+        System.out.println("boardEntities.getTotalElements() = " + boardEntities.getTotalElements()); // 전체 글갯수
+        System.out.println("boardEntities.getNumber() = " + boardEntities.getNumber()); // DB로 요청한 페이지 번호
+        System.out.println("boardEntities.getTotalPages() = " + boardEntities.getTotalPages()); // 전체 페이지 갯수
+        System.out.println("boardEntities.getSize() = " + boardEntities.getSize()); // 한 페이지에 보여지는 글 갯수
+        System.out.println("boardEntities.hasPrevious() = " + boardEntities.hasPrevious()); // 이전 페이지 존재 여부
+        System.out.println("boardEntities.isFirst() = " + boardEntities.isFirst()); // 첫 페이지 여부
+        System.out.println("boardEntities.isLast() = " + boardEntities.isLast()); // 마지막 페이지 여부
+
+        // 목록: id, writer, title, hits, createdTime + 작성자: memberEmail
+        Page<BoardDTO> boardDTOS = boardEntities.map(board -> new BoardDTO(board.getId(), board.getAdminBoardId(),
+                board.getBoardTitle(), board.getBoardHits(), board.getBoardCreatedTime()));
+        return boardDTOS;
+    }
+
+    // Authentication 객체를 사용하여 현재 사용자의 이름을 가져오는 메서드(게시판 작성자)
+    public String getMemberNameFromAuthentication() {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String memberName = memberService.findMemberNameByMemberEmail(memberEmail);
+        return memberName;
+    }
+    //작성자 컬럼 찾아오기.
+    public List<BoardDTO> findByAdminBoardId(String adminBoardId){
+        List<BoardEntity> boardEntityList = boardRepository.findByAdminBoardId(adminBoardId);
+        List<BoardDTO> boardDTOList = new ArrayList<>();
+        for (BoardEntity boardEntity : boardEntityList) {
+            boardDTOList.add(BoardDTO.toBoardDTO(boardEntity));
+        }
+        return boardDTOList;
+    }
+}
+
+```
+</details>
+
+## 새의 뉴스
+크롤링을 활용한 NEWS 게시판, (크롤링->엑셀->데이터베이스), 새로운 뉴스 지난 뉴스 ,과학 뉴스카테고리 분류 구현.
+
+<details>
+    <summary>코드 보기(HTMl)</summary>
+
+```html
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+```
+</details>
+
+<details>
+    <summary>코드 보기(Controller)</summary>
+
+```java
+@Controller
+@RequestMapping("/members")
+@RequiredArgsConstructor
+public class NewsController {
+
+    private final NewsService newsService;
+    private final ScienceonService scienceonService;
+
+    @GetMapping("/news")
+    public String showNews(Model model, @RequestParam(defaultValue = "0") int newPage, @RequestParam(defaultValue = "0")
+                           int pastPage, @RequestParam(defaultValue = "0") int scienceonPage) {
+
+        // 최신 뉴스 페이징 처리
+        Page<NewsDTO> latestNews = newsService.findLatestNews(newPage, 3);
+        model.addAttribute("newNews", latestNews);
+        model.addAttribute("newPage", newPage);
+        model.addAttribute("hasNextNewPage", latestNews.hasNext());
+
+
+        // 과거 뉴스 페이징 처리
+        Page<NewsDTO> pastNews = newsService.findPastNews(pastPage, 5);
+        model.addAttribute("pastNews", pastNews);
+        model.addAttribute("pastPage", pastPage);
+        model.addAttribute("hasNextPastPage", pastNews.hasNext());
+
+        
+        // 과학 뉴스
+        Page<ScienceDTO> scienceNews = scienceonService.findScienceNews(scienceonPage, 5);
+        model.addAttribute("scienceNews", scienceNews);
+        model.addAttribute("sciencePage", scienceonPage);
+        model.addAttribute("hasNextSciencePage", scienceNews.hasNext());
+        return "member/news";
+    }
+}
+```
+</details>
+
+<details>
+    <summary>코드 보기(Service)</summary>
+
+```java
+@Service
+@RequiredArgsConstructor
+public class NewsService {
+
+    private final NewsRepository newsRepository;
+
+    public List<NewsDTO> findAllNews() {
+        // 모든 뉴스 정보 가져오기
+        return newsRepository.findAll().stream().map(this::convertEntityToDTO).collect(Collectors.toList());
+    }
+
+    // 페이징 처리된 최신 뉴스 정보 가져오기
+    public Page<NewsDTO> findLatestNews(int page, int size){
+
+        return newsRepository.findAllByOrderByBirdysNewsRegisterDateDesc(PageRequest.of(page,size)).map(this::convertEntityToDTO);
+    }
+
+    // 페이징 처리된 과거 뉴스 정보 가져오기
+    public Page<NewsDTO> findPastNews(int page, int size){
+
+        return newsRepository.findAllByOrderByBirdysNewsRegisterDateAsc(PageRequest.of(page,size)).map(this::convertEntityToDTO);
+    }
+
+    public NewsDTO convertEntityToDTO(News news) {
+        // 가져온 데이터를 DTO에 있는 필드을 저장한 후 DTO를 리턴
+        NewsDTO newsDTO = new NewsDTO();
+        newsDTO.setBirdysNewsId(news.getBirdysNewsId()); // Id
+        newsDTO.setBirdysNewsTitle(news.getBirdysNewsTitle()); // 뉴스 제목
+        newsDTO.setBirdysNewsContent(news.getBirdysNewsContent()); // 뉴스 내용
+        newsDTO.setBirdysNewsSource(news.getBirdysNewsSource()); // 뉴스 URL
+        newsDTO.setBirdysNewsRegisterDate(news.getBirdysNewsRegisterDate()); // 뉴스 등록 일자
+        return newsDTO;
+    }
+}
+```
+</details>
+
+## 메인 페이지 및 새의 통계 및 그래프 시각화
+공공API를 활용한 새의 통계 게시판, 새의 통계 데이터를 가져오고 맵 형태로 화면에 반환 페이징 처리하여 메인 화면에 구현.
+
+<details>
+    <summary>코드 보기(HTMl)</summary>
+
+```html
+<!-- /*
+* Bootstrap 5 / main.html
+* Template Name: Furni
+* Template Author: Untree.co
+* Template URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!doctype html>
+<html lang="ko" xmlns:th="https://thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate='~{layouts/layout1}'>
+
+
+
+<th:block layout:fragment="script">
+
+	<script th:inline="javascript">
+
+
+      const token = $("meta[name='_csrf']").attr("content");
+      const header = $("meta[name='_csrf_header']").attr("content");
+
+	document.addEventListener('DOMContentLoaded', function () {
+      // 페이지 로드 시 초기 데이터를 가지고 그래프를 그립니다.
+ /*<![CDATA[*/
+    const birdLabels = /*[[${birdLabels}]]*/ [];
+    const birdData = /*[[${birdData}]]*/ [];
+
+	 /*]]>*/
+
+
+
+
+
+    let birdChart = new Chart(document.getElementById("bird-chat"), {
+        type: 'bar',
+        data: {
+            labels: birdLabels,
+            datasets: [{
+                label: '개체수',
+                data: birdData,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    });
+		// 페이지 이동 시에 호출되는 함수
+    function updateBirdChart(birdData) {
+        // 새로운 데이터로 그래프를 업데이트합니다.
+        var birdLabels = Object.keys(birdData);
+        var birdCounts = Object.values(birdData);
+
+        birdChart.data.labels = birdLabels;
+        birdChart.data.datasets[0].data = birdCounts;
+        birdChart.update();
+    }
+
+
+	</script>
+</th:block>
+<th:block layout:fragment="css">
+	<style>
+		.intro {
+    position: fixed;
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    width: 100%;
+    background-color: white;
+    z-index: 1115;
+  }
+
+  .intro__title {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 75%;
+    text-align: center;
+    line-height: 85px;
+    font-size: 40px;
+    mix-blend-mode: difference;
+    z-index: 2;
+    transform: translateY(40px);
+  }
+
+  .intro__background {
+    position: absolute;
+    top: 0;
+    background-color: black;
+    width: 50%;
+    height: 100%;
+    transform: scaleX(0);
+  }
+
+  .intro__background--left {
+    left: 0;
+    transform-origin: left center;
+  }
+
+  .intro__background--right {
+    left: 50%;
+    transform-origin: right center;
+  }
+		.science, .news, .past, .meta{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .new-news, .past-news, .science-news{
+            text-align: center;
+        }
+        .science p, .news p, .past p,
+        .science h3, .news h3, .past h3, .meta span{
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+	</style>
+</th:block>
+<div layout:fragment="content">
+
+
+
+	<!-- Start Hero Section -->
+	<div class="hero">
+		<div class="container">
+			<div class="row justify-content-between">
+				<div class="col-lg-5">
+					<div class="intro-excerpt">
+						<h1>새의 아름다움과<span class="d-block">지식 공간</span></h1>
+						<p class="mb-4">새의 통계와 커뮤니티를 제공하여 <br>다양한 사람들과 함께 지식을 공유하는 공간입니다."</p>
+						<p><a th:href="@{/bird/birds}" class="btn btn-secondary me-2">새의 앨범</a><a th:href="@{/board/list}" class="btn btn-white-outline">커뮤니티</a></p>
+					</div>
+				</div>
+				<div class="col-lg-7">
+					<div class="hero-img-wrap">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End Hero Section -->
+
+	<!-- Start Product Section -->
+	<div class="product-section">
+		<div class="container">
+			<div class="row">
+
+				<!-- Start Column 1 -->
+				<div>
+					<h2 class="mb-4 section-title center">새의 통계</h2>
+					<p class="mb-4 center">2019년 새의 개체수</p>
+					<!--						<p><a href="shop.html" class="btn">Explore</a></p>-->
+				</div>
+				<canvas id="bird-chat" width="1320" height="250"></canvas>
+
+				<div class="container">
+					<div class="row grid_border">
+						<table border="1">
+							<!-- 테이블 헤더: 도시 이름 -->
+							<thead>
+							<tr>
+								<th>새 이름</th>
+								<!-- 각 도시의 이름 -->
+								<th th:each="birdDosi : ${birdList}" th:text="${birdDosi.key}"></th>
+							</tr>
+							</thead>
+							<!-- 테이블 바디: 개체수 -->
+							<tbody>
+							<!-- 각 새의 이름에 대해 -->
+							<tr th:each="birdEntry : ${birdPage.content}">
+								<td th:text="${birdEntry.key}"></td>
+								<!-- 각 새의 이름에 해당하는 도시별 개체수 -->
+								<td th:each="birdDosi : ${birdList}">
+									<!-- 해당 도시가 존재하는지 확인 -->
+									<span th:if="${birdEntry.value.containsKey(birdDosi.key)}"
+										  th:text="${birdEntry.value.get(birdDosi.key)}" class="bird_value"></span>
+									<!-- 해당 도시가 존재하지 않으면 0 표시 -->
+									<span th:unless="${birdEntry.value.containsKey(birdDosi.key)}">-</span>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+						<!-- 페이지 번호 표시 -->
+						<div th:if="${birdPage.getTotalPages() > 1}" style="margin: 20px 0 0 0;">
+							<ul class="pagination justify-content-center">
+								<!-- 처음으로 버튼 -->
+								<li th:class="${birdPage.first ? 'disabled' : ''}" th:unless="${birdPage.first}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=1'}">처음으로</a>
+								</li>
+								<!-- 이전 버튼 -->
+								<li th:class="${birdPage.hasPrevious() ? '' : 'disabled'}" th:unless="${birdPage.first}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=' + ${birdPage.number}}">이전</a>
+								</li>
+								<!-- 페이지 번호 -->
+								<li th:each="i : ${#numbers.sequence((birdPage.number / 10) * 10, (birdPage.number / 10) * 10 + 9)}" th:class="${birdPage.number == i ? 'active' : ''}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=' + ${i+1}}" onclick="updateBirdChart(/*[[${birdCount}]]*/);">[[${i+1}]]</a>
+								</li>
+								<!-- 다음 버튼 -->
+								<li th:class ="${birdPage.hasNext() ? '' : 'disabled'}">
+									<a class="btn btn-primary btn-sm" th:if="${birdPage.hasNext()}" th:href="@{'/?page=' + ${birdPage.number +2}}">다음</a>
+								</li>
+								<!-- 끝 버튼 -->
+								<li th:class="${birdPage.last ? 'disabled' : ''}" th:unless="${birdPage.last}">
+									<a class="btn btn-primary btn-sm" th:href="@{'/?page=' + ${birdPage.getTotalPages()}}">끝</a>
+								</li>
+
+							</ul>
+						</div>
+					</div>
+					<!-- End Product Section -->
+
+					<!-- 게시판 세션 -->
+					<!-- Start Why Choose Us Section -->
+					<div class="why-choose-section">
+						<div class="container">
+							<div class="row justify-content-between">
+								<div class="col-lg-6">
+									<h2 class="section-title">커뮤니티 게시판</h2>
+									<p>자신이 알고 있는 지식을 사람들에게 공유해 보세요</p>
+
+									<div class="row my-5">
+
+										<div class="col-10 col-md-8">
+											<div class="feature">
+												<table>
+													<tr>
+														<th>번호</th>
+														<th>제목</th>
+														<th>내용</th>
+														<th>작성일자</th>
+														<th>조회수</th>
+													</tr>
+													<tr th:each="board : ${boardList}" th:limit="5">
+														<td th:text="${board.id}"></td>
+														<td><a th:href="@{|/board/${board.id}|}" th:text="${board.boardTitle}"></a></td>
+														<td th:text="${board.adminBoardId}"></td>
+														<td th:text="*{#temporals.format(board.BoardCreatedTime, 'yyyy-MM-dd')}"></td>
+														<td th:text="${board.boardHits}"></td>
+													</tr>
+												</table>
+											</div>
+										</div>
+
+									</div>
+								</div>
+
+								<div class="col-lg-5">
+									<div class="img-wrap">
+										<img th:src="@{images/오색딱따구리.jpg}" alt="Image" class="img-fluid">
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+					<!-- End Why Choose Us Section -->
+
+					<!-- Start We Help Section -->
+					<div class="we-help-section">
+						<div class="container">
+							<div class="row justify-content-between">
+								<div class="col-lg-5 ps-lg-5">
+									<h2 class="section-title mb-4">과학 뉴스</h2>
+									<p>새의 대한 소식을 듣고 싶다면 아래와 같이 뉴스 정보가 보입니다!</p>
+
+									<ul class="list-unstyled custom-list my-4">
+										<li th:each="science : ${scienceNews}" class="science">
+											<a th:text="${science.birdysScienceonTitle}" th:href="${science.birdysScienceonSource}" style="text-decoration: none; font-size: 20px;"></a>
+											<p th:text="${science.birdysScienceonContent}"></p>
+										</li>
+									</ul>
+									<p><a herf="#" class="btn">뉴스 보러가기</a></p>
+								</div>
+								<div class="col-lg-5 ps-lg-5">
+									<h2 class="section-title mb-4">최신 뉴스</h2>
+									<p>새의 대한 소식을 듣고 싶다면 아래와 같이 뉴스 정보가 보입니다!</p>
+
+									<ul class="list-unstyled custom-list my-4">
+										<li th:each="news : ${newNews}" class="news">
+											<a th:text="${news.birdysNewsTitle}" th:href="${news.birdysNewsSource}" style="text-decoration: none; font-size: 20px;"></a>
+											<p th:text="${news.birdysNewsContent}"></p>
+										</li>
+									</ul>
+									<p><a herf="#" class="btn">뉴스 보러가기</a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End We Help Section -->
+
+					<!-- Start Blog Section -->
+					<div class="blog-section">
+						<div class="container">
+							<div class="row mb-5">
+								<div class="col-md-6">
+									<h2 class="section-title">새의 앨범</h2>
+								</div>
+								<div class="col-md-6 text-start text-md-end">
+									<a th:href="@{/}" class="more">새의 앨범 이동</a>
+								</div>
+							</div>
+
+							<div class="row">
+
+
+								<div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0" th:each="bird : ${birdblog}" th:id="${bird.id}">
+									<div class="post-entry">
+										<a href="#" class="post-thumbnail"><img th:src="${bird.birdImgUrl}" th:alt="${bird.birdName}" class="img-fluid"></a>
+										<div class="post-content-entry">
+											<h3 th:text="${bird.birdName}">${bird.birdName}</h3>
+											<div class="meta">
+												<span th:text="${bird.birdDetail}"></span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							</div>
+						</div>
+					</div>
+					<!-- End Blog Section -->
+
+				</div>
+			</div>
+		</div>
+</html>
+```
+</details>
+
+<details>
+    <summary>코드 보기(Controller)</summary>
+
+```java
+@Controller
+@RequiredArgsConstructor
+public class MainController {
+    private final BirdStatisticsService birdStatisticsService;
+    private final BoardService boardService;
+    private final NewsService newsService;
+    private final ScienceonService scienceonService;
+    private final BirdListService birdListService;
+
+
+    @GetMapping("/")
+    public String birdTest(Model model, HttpServletRequest request , @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
+                           @RequestParam(defaultValue = "0") int scienceonPage)  {
+
+
+
+        Pageable pageable = PageRequest.of(page -1, size);
+        Page<Map.Entry<String, Map<String, Long>>> birdPage = birdStatisticsService.getBirdPage(pageable);
+
+        // 새 총 개체수와 새 이름 목록 가져오기
+        Map<String, Long> birdList = birdStatisticsService.getTotalBirdName();
+
+        // 새 지역별 개체수 파악
+        Map<String, Map<String, Long>> birdStatisticsDTOList = birdStatisticsService.getTotalCountByBirdName();
+
+        // birdStatisticsDTOList를 라벨과 데이터로 변환
+        List<String> birdLabels = new ArrayList<>(); // Map 키
+        List<Long> birdData = new ArrayList<>(); // Map 값
+
+        for (Map.Entry<String, Map<String, Long>> entry : birdPage.toSet()) {
+            birdLabels.add(entry.getKey()); // 새의 이름을 라벨로 추가
+
+            // 각 새의 지역별 개체수를 합산하여 데이터로 추가
+            long totalCount = entry.getValue().values().stream().mapToLong(Long::valueOf).sum();
+            birdData.add(totalCount);
+        }
+        // 최초 페이지 로드 여부를 확인하는 변수
+        boolean isFirstPage = false;
+        // 최초 페이지 로드인지 확인
+        if (request.getParameter("page") == null) {
+            isFirstPage = true;
+        }
+
+
+        // 게시판 리스트 출력
+        List<BoardDTO> boardDTOList = boardService.findAll();
+
+        // 멸종 위기종 기준
+        BirdGroup group = BirdGroup.I;
+
+        // intro 여부
+        model.addAttribute("isFirstPage", isFirstPage);
+
+        // 새의 통계 처리
+        model.addAttribute("birdPage", birdPage); // 페이징 처리
+        model.addAttribute("birdList", birdList); // 새의 총 개체수
+        model.addAttribute("birdStatisticsDTOList", birdStatisticsDTOList); // 새 지역별 개체수
+        model.addAttribute("birdLabels",birdLabels); // 새의 이름
+        model.addAttribute("birdData",birdData); // 새의 지역별 개체수
+
+        // 게시판 처리
+        model.addAttribute("boardList",boardDTOList); // 게시판
+
+        // 최신 뉴스 페이징 처리
+        Page<NewsDTO> latestNews = newsService.findLatestNews(page, 4); // 최신 뉴스 4개까지 가져옴
+        model.addAttribute("newNews", latestNews);
+
+        // 과학뉴스
+        Page<ScienceDTO> scienceNews = scienceonService.findScienceNews(scienceonPage, 4);// 과학 뉴스 4개까지 가져옴
+        model.addAttribute("scienceNews", scienceNews);
+
+
+        // 새의 앨범
+        Page<BirdListFormDTO> birdblog = birdListService.getBirdListByBirdGroup(group, page, 3);
+        model.addAttribute("birdblog", birdblog);
+        return "index";
+    }
+}
+
+```
+</details>
+
+<details>
+    <summary>코드 보기(Service)</summary>
+
+```java
+@Service
+@RequiredArgsConstructor
+public class BirdStatisticsService {
+
+    private final BirdStatisticsRepository birdStatisticsRepository;
+
+    // 새의 총 개체수와 각 도시별 개체 수를 반환하는 메서드
+    public Map<String, Map<String, Long>> getTotalCountByBirdName() {
+
+        // 저장할 Map
+        Map<String, Map<String, Long>> birdNameCity = new HashMap<>();
+        // DB에 저장된 새의 모든 이름을 갖고옴
+        List<String> birdNames = birdStatisticsRepository.findAllBirdNames();
+
+        // 각 새 이름에 대한 개체 수를 계산하여 Map에 저장
+        for (String birdName : birdNames) {
+            // 각 새 이름에 대한 도시별 총 개체 수를 저장할 cityMap를 생성
+            Map<String, Long> cityMap = new HashMap<>();
+
+            // 새 이름에 대한 각 도시별 개체 수를 조회한 후 cityCounts에 저장
+            List<BirdStatisticsDTO> cityCounts = birdStatisticsRepository.findCityCountsByNames(birdName);
+
+            // 리스트 형태인 cityCounts를 1개씩 꺼내와서 cityMap에 저장
+            for(BirdStatisticsDTO birdStatisticsDTO : cityCounts){
+                cityMap.put(birdStatisticsDTO.getDosi(), birdStatisticsDTO.getCount());
+            }
+            // 새 이름과 새 이름에 대한 도시별 총 개체 수를 birdNameCity에 저장
+            birdNameCity.put(birdName, cityMap);
+        }
+        // 담겨진 변수를 반환
+        return birdNameCity;
+    }
+
+    // 새의 총 개체 수를 페이지별로 반환하는 메서드
+    public Map<String, Long> getTotalCountBirdName(int page, int size) {
+        Map<String, Long> totalCountByBirdName = new HashMap<>();
+
+
+        // 모든 새 종류 조회, 페이징 처리
+        List<String> birdNames = birdStatisticsRepository.findAllBirdNames(PageRequest.of(page,size));
+
+        // 각 새 종류별 개체수 합산
+        for (String birdName : birdNames) {
+            // birdNames와 일치하는 새 이름으로 총 개체 수를 구함
+            Long totalCount = birdStatisticsRepository.findTotalCountByName(birdName);
+
+            // 새 이름과 총 개체수를
+            totalCountByBirdName.put(birdName, totalCount);
+        }
+        // 담겨진 Map를 반환
+        return totalCountByBirdName;
+    }
+
+    // 새의 도시별 개체 수를 반화하는 메서드
+    public Map<String, Long> getTotalBirdName() {
+
+        // 저장할 Map
+        Map<String, Long> birdBirdNameCity = new HashMap<>();
+
+        // DB에 저장된 새의 모든 이름을 갖고옴
+        List<String> birdNames = birdStatisticsRepository.findAllBirdNames();
+
+        // 각 새 이름에 대한 도시별 개체 수를 계산하기 위함
+        for (String birdName : birdNames) {
+            // 새 이름에 대한 각 도시별 개체 수를 조회하여 리스트에 저장
+            List<BirdStatisticsDTO> cityCounts = birdStatisticsRepository.findCityCountsByNames(birdName);
+
+            for(BirdStatisticsDTO birdStatisticsDTO : cityCounts){
+                birdBirdNameCity.put(birdStatisticsDTO.getDosi(), birdStatisticsDTO.getCount());
+            }
+
+        }
+        return birdBirdNameCity;
+    }
+
+
+    // 페이징 처리된 새의 통계 데이터를 반환하는 메서드
+    public Page<Map.Entry<String, Map<String, Long>>> getBirdPage(Pageable pageable){
+
+        // 새의 총 개체 수와 각 도시별 개체 수를 가져옴
+        Map<String, Map<String, Long>> birdNameCity = getTotalCountByBirdName();
+
+        // Map을 List로 변환하여 페이지 처리
+        List<Map.Entry<String, Map<String, Long>>> birdStatisticsDTOList  = new ArrayList<>(birdNameCity.entrySet());
+
+        // 페이지 번호와 페이지 크기에 따라 해당 페이지에 대한 데이터를 추출
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), birdStatisticsDTOList.size());
+
+        List<Map.Entry<String, Map<String, Long>>> sublist = birdStatisticsDTOList.subList(start, end);
+
+
+        return new PageImpl<>(sublist, pageable, birdNameCity.size());
+    }
+
+}
+
+```
+</details>
+
+## 새의 앨범
+우리나라에서 볼수 있는 조류 정보를 갖고 "**ㄱ,ㄴ,ㄷ 모음에 따른 데이터 분류**" 하여 <br>
+새의 사진과 이름 새의 대한 간략한 설명글으로 구성하여 구현
+
+<details>
+    <summary>코드 보기(HTMl)</summary>
+
+```html
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+```
+</details>
+
+<details>
+    <summary>코드 보기(Controller)</summary>
+
+```java
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+```
+</details>
+
+<details>
+    <summary>코드 보기(Service)</summary>
+
+```java
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
 ```
 </details>
