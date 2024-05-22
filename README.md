@@ -518,7 +518,9 @@ public class MemberService{
 
 <details>
     <summary>코드 보기(Controller)</summary>
+	
 ```java
+
 @GetMapping("/birdy")
     // 새의 탐조
     public String showBirds(@RequestParam(required = false) String type, Model model) {
