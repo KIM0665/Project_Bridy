@@ -33,9 +33,8 @@
 <details>
     <summary>보기</summary>
 
-```
 ![image](https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/7ccb7fa5-ff97-43f6-92ee-e969c4fcf00c)
-```
+
 </details>
 
 ## 프로젝트 일정
@@ -43,10 +42,8 @@
 <details>
     <summary>보기</summary>
 
-```
 ![image](https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/700954bf-f74d-4331-afba-8da8733c9faf)
 
-```
 </details>
 
 ## ERD 설계
@@ -54,10 +51,8 @@
 <details>
     <summary>보기</summary>
 
-```
 ![image](https://github.com/koyuhjkl123/Project_Bridy/assets/94844952/1ae06032-5dc8-41d9-9d47-68952298a698)
 
-```
 </details>
 
 
